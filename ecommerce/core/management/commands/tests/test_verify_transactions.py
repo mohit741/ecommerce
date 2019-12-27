@@ -202,9 +202,10 @@ class VerifyTransactionsTest(TestCase):
                                       date_created=self.timestamp)
         payment.save()
         with self.assertRaises(CommandError) as cm:
-            call_command('verify_transactions')
+            call_command('verify_transactions', '--support')
         exception = six.text_type(cm.exception)
         self.assertIn("The following order totals mismatch payments received", exception)
+        self.assertTrue(payment.amount != 90.0)
         self.assertIn(str(self.order.id), exception)
         self.assertIn(str(payment.id), exception)
         self.assertIn('"amount": 90.0', exception)

@@ -86,7 +86,7 @@ class Command(BaseCommand):
         parser.add_argument(
             '--support',
             action='store_true',
-            help='Support for mismatched orders'
+            help='Mismatched orders to go to Support'
         )
 
     def handle(self, *args, **options):
@@ -114,7 +114,10 @@ class Command(BaseCommand):
             return
 
         for order in orders:
-            self.validate_order(order)
+            if support:
+                self.validate_order_mismatch(order)
+            else:
+                self.validate_order(order)
 
         # FIXME: it is possible for an order to have more than one error, so this really should
         # count "unique orders with errors", not number of errors
@@ -136,6 +139,22 @@ class Command(BaseCommand):
         if self.ERRORS_DICT:
             logger.warning("Errors in transactions within threshold (%r): %s", threshold, exit_errors)
 
+    def validate_order_mismatch(self, order):
+        all_payment_events = order.payment_events
+        payments = all_payment_events.filter(event_type=self.PAID_EVENT_TYPE)
+
+        # If the payment total and the order total do not match, flag for review.
+        if payments.aggregate(total=Sum('amount')).get('total') != order.total_incl_tax:
+            mismatch_total = payments.aggregate(total=Sum('amount')).get('total') - order.total_incl_tax
+            logger.warning("Order number: %s, User email: %s, Total to be refunded: %s",
+                           order.number, order.guest_email, mismatch_total)
+            # FIXME: validate_order should be changed to log _all_ errors related to an order
+            self.add_error(
+                "orders_mismatched_totals",
+                "The following order totals mismatch payments received",
+                order,
+                payments
+            )
 
     def validate_order(self, order):
         all_payment_events = order.payment_events
@@ -157,16 +176,6 @@ class Command(BaseCommand):
             self.add_error(
                 "orders_multi_payment",
                 "The following orders had multiple payments",
-                order,
-                payments
-            )
-
-        # If the payment total and the order total do not match, flag for review.
-        elif payments.aggregate(total=Sum('amount')).get('total') != order.total_incl_tax:
-            # FIXME: validate_order should be changed to log _all_ errors related to an order
-            self.add_error(
-                "orders_mismatched_totals",
-                "The following order totals mismatch payments received",
                 order,
                 payments
             )
