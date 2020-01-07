@@ -115,7 +115,7 @@ class Command(BaseCommand):
 
         for order in orders:
             if support:
-                self.validate_order_mismatch(order)
+                self.validate_order_support(order)
             else:
                 self.validate_order(order)
 
@@ -139,22 +139,35 @@ class Command(BaseCommand):
         if self.ERRORS_DICT:
             logger.warning("Errors in transactions within threshold (%r): %s", threshold, exit_errors)
 
-    def validate_order_mismatch(self, order):
+    def validate_order_support(self, order):
         all_payment_events = order.payment_events
         payments = all_payment_events.filter(event_type=self.PAID_EVENT_TYPE)
 
         # If the payment total and the order total do not match, flag for review.
         if payments.aggregate(total=Sum('amount')).get('total') != order.total_incl_tax:
-            mismatch_total = payments.aggregate(total=Sum('amount')).get('total') - order.total_incl_tax
-            logger.warning("Order number: %s, User email: %s, Total to be refunded: %s",
-                           order.number, order.guest_email, mismatch_total)
+            mismatch_total = float(payments.aggregate(total=Sum('amount')).get('total') - order.total_incl_tax)
             # FIXME: validate_order should be changed to log _all_ errors related to an order
-            self.add_error(
-                "orders_mismatched_totals",
-                "The following order totals mismatch payments received",
-                order,
-                payments
-            )
+            # If payment amount > order amount, a refund is required from Support
+            if mismatch_total > 0:
+                tag = "orders_mismatched_totals_support"
+                if tag not in self.ERRORS_DICT:
+                    self.ERRORS_DICT[tag] = {
+                        "message":
+                            "There was a mismatch in the totals in the following order that require a refund",
+                        "errors": []
+                    }
+                self.ERRORS_DICT[tag]["errors"].append(
+                    {
+                        "order_number": order.number,
+                        "order_id": order.id,
+                        "order_amount": float(order.total_incl_tax),
+                        # Assuming just one payment since we do not support multi-payment
+                        "payment_id": payments[0].id,
+                        "payment_amount": float(payments[0].amount),
+                        "user_email": order.guest_email,
+                        "refund_amount": mismatch_total
+                    }
+                )
 
     def validate_order(self, order):
         all_payment_events = order.payment_events
@@ -176,6 +189,15 @@ class Command(BaseCommand):
             self.add_error(
                 "orders_multi_payment",
                 "The following orders had multiple payments",
+                order,
+                payments
+            )
+
+        # Order amount is greater than what was paid, flag this for review.
+        if payments.aggregate(total=Sum('amount')).get('total') < order.total_incl_tax:
+            self.add_error(
+                "orders_mismatched_totals",
+                "The following order totals mismatch payments received",
                 order,
                 payments
             )
