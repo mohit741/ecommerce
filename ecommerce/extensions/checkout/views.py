@@ -162,7 +162,7 @@ class ReceiptResponseView(ThankYouView):
                 'order_history_url': request.site.siteconfiguration.build_lms_url('account/settings'),
             }
             return self.render_to_response(context=context, status=404)
-        self.add_message_if_enterprise_user(request)
+        #self.add_message_if_enterprise_user(request) TODO Uncomment when enterprise url works
         return response
 
     def get_context_data(self, **kwargs):  # pylint: disable=arguments-differ
