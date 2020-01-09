@@ -63,6 +63,8 @@ PAYMENT_PROCESSOR_CONFIG = {
             'mode': 'sandbox',
             'client_id': 'AQSVOFX30wOSrnBkZQUfTYO6uoArgBtNzgbzmlAucjVlu7w5hX6egeiNClVuQoqSK5udfDdGZyWquYXU',
             'client_secret': 'EKzhTOaJY3jJWk5dQglza6s-wyGJAAUXLjwKwya495ymceDNU4IMqUGEK9jLLqVkCwybF4kMH7H1G-eF',
+            #'client_id': 'AVcS4ZWEk7IPqaJibex3bCR0_lykVQ2BHdGz6JWVik0PKWGTOQzWMBOHRppPwFXMCPUqRsoBUDSE-ro5',
+            #'client_secret': 'EHNgP4mXL5mI54DQI1-EgXo6y0BDUzj5x1_8gQD0dNWSWS6pcLqlmGq8f5En6oos0z2L37a_EJ27mJ_a',
             'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
             'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
         },

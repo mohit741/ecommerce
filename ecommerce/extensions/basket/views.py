@@ -385,6 +385,7 @@ class BasketLogicMixin(object):
                     product.is_seat_product
                 )
                 raise
+            
             if certificate_type == 'verified':
                 return _(
                     'After you complete your order you will be automatically enrolled '
