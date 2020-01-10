@@ -211,7 +211,7 @@
                     {# restore the name attribute to ensure this information is sent to the payment processor. #}
                     <input type="hidden" data-name="card_type" class="pci-field">
                     <div class="form-group col-md-6">
-                        <label for="card-cvn" class="control-label">
+                        <label for="card-cvn" class="control-label" id="cardholder_name">
                             {% trans "Cardholder Name" as tmsg %}{{ tmsg | force_escape }}
                             <span class="sr">, {% trans "Secure" as tmsg %}{{ tmsg | force_escape }}</span>
                             <button id="card-cvn-help" aria-haspopup=true aria-controls="cvvtooltip" aria-expanded=false>
@@ -227,14 +227,14 @@
                         <p class="help-block"></p>
                     </div>
                     <div class="form-group col-md-6">
-                        <label for="card-number" class="control-label">{% trans "Card Number" as tmsg %}{{ tmsg | force_escape }}<span class="sr">, {% trans "Secure" as tmsg %}{{ tmsg | force_escape }}</span></label>
+                        <label for="card-number" class="control-label" id="card-number">{% trans "Card Number" as tmsg %}{{ tmsg | force_escape }}<span class="sr">, {% trans "Secure" as tmsg %}{{ tmsg | force_escape }}</span></label>
                         <input id="card-number" type="text" class="form-control pci-field" maxlength="20" required pattern="[0-9]*"/>
                         <i class="fa fa-lock" aria-hidden="true"></i>
                         <img class="card-type-icon hidden" alt="{% trans "Credit card icon" as tmsg %}{{ tmsg | force_escape }}">
                         <p class="help-block"></p>
                     </div>
                     <div class="form-group col-md-9" id="expiry">
-                    <p id="expiration-label" for="card-expiry-month" class="control-label">{% trans "Expiration" as tmsg %}{{ tmsg | force_escape }}</p>
+                    <p id="expiration-label" for="card-expiry-month" class="control-label" >{% trans "Expiration" as tmsg %}{{ tmsg | force_escape }}</p>
                     <div class="form-group col-sm-6 col-xs-7" id="exp-month">
                         <select id="card-expiry-month" class="form-control pci-field" required
                         aria-labelledby="month-label expiration-label">
@@ -257,7 +257,7 @@
                     </div>
                 </div>
                  <div class="form-group col-md-3">
-                        <label for="card-cvn" class="control-label">
+                        <label for="card-cvn" class="control-label" id="card-cvn">
                             {% trans "CVV/CVC " as tmsg %}{{ tmsg | force_escape }}
                             <span class="sr">, {% trans "Secure" as tmsg %}{{ tmsg | force_escape }}</span>
                             <button id="card-cvn-help" aria-haspopup=true aria-controls="cvvtooltip" aria-expanded=false>
