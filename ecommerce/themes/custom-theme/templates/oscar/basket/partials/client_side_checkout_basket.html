@@ -154,10 +154,14 @@
             <div role="region" aria-labelledby="payment-method-region">
                 <h2 id="payment-method-region" class="title">{% trans "Payment Gateway" as tmsg %}{{ tmsg | force_escape }}</h2>
                   <div id="payment-processor" class="payment-buttons col-sm-12" data-basket-id="{{ basket.id }}">
-                      <a href="#payment-information" class="payment-button credit-card" title="{% trans "Pay with a Credit Card" as tmsg %}{{ tmsg | force_escape }}" role="button">
+                      <a href="#payment-information" class="payment-button credit-card" title="{% trans "Pay with a Credit Card" as tmsg %}{{ tmsg | force_escape }}" role="button" id="card-payment-thumbnail">
                           <img src="/static/images/credit_card_options.png">
                       </a>
                       {# Translators: Do NOT translate the name PayPal. #}
+                      <p> 
+                        <input type="radio" id="online-pay">Pay With Online Methods
+                    </p>
+                      <div class="online-payment">
                       <button data-track-type="click"
                               data-track-event="edx.bi.ecommerce.basket.payment_selected"
                               data-track-category="checkout"
@@ -176,6 +180,64 @@
                               class="payment-button apple-pay-button apple-pay-button-black"
                               title="{% trans "Pay with Apple Pay" as tmsg %}{{ tmsg | force_escape }}" type="button">
                       </button>
+
+                      <button id="razorpay">
+                        <a class="btn btn-submit" href="{% url 'razorpay:razorpay-direct-payment'%}">
+                            <img alt="Pay with RazorPay" src="/static/custom-theme/images/Razorpay_logo.png" id="razorpay-logo"></a>
+                      </button>
+                  </div>
+                      <p> 
+                        <input type="radio" id="mobile-pay">Pay With Mobile
+                    </p>
+                      <div class="qrcode-payment">
+                      <div class="sc__payment-method show">
+                        <div class="checkout--sc-card-box--1T6i_ checkout--sc-card-box--compact--1LhyD checkout--active--2XYCh">
+                            <div class="checkout--sc-card-content__inner--6lXc1 checkout--sc-card-content--KQZ7E collapse in">
+                                <div>
+                                    <p>
+                                        <span>Buy this course on our mobile app, using your existing Udemy account credentials: 
+                                            <b>namesome@gmail.com</b> and your Udemy account password.
+                                        </span>
+                                    </p>
+                                    <br>
+                                    <div>
+                                        <p class="mb-space-sm bold">Option 1: Scan the QR Code</p>
+                                        <div class="fx-jsb-on-desktop">
+                                            <img class="images" alt="" src="/static/custom-theme/images/qrcode.jpeg">
+                                            <div class="fx mb-space-lg">
+                                                <p>Snap a picture of the QR code graphic using a QR-enabled mobile device.*</p>
+                                                <p>You will be directed to the course purchase page on the Udemy app, where you can complete your purchase using the methods available from your app store (Apple Store or Google Play).</p>
+                                                <p class="small">* You can download a QR app if your mobile camera doesn’t have the built in functionality.</p>
+                                            </div>
+                                        </div>
+                                        <hr class="hr-with-text mb-space-lg" data-content="OR">
+                                        <p class="mb-space-sm bold">Option 2: Request an SMS Code</p>
+                                        <p class="mb-space-sm">Click the link below to receive an SMS with a link to the course purchase page in the Udemy mobile app.</p>
+                                    </div>
+                                </div>
+                                <div class="clearfix"> 
+                                </div>
+                                <div class="checkout--sc-card-footer--14lRj">
+                                    <div class="checkout--sc-checkout-box__notes--108Ru">
+                                        <span>By completing your purchase you agree to these 
+                                            <a href="https://www.udemy.com/terms/" class="bold" target="_blank" rel="noopener noreferrer">Terms of Service</a>.
+                                        </span>
+                                    </div>
+                                    <div class="hidden-xxs hidden-xs checkout--sc-checkout-box__security-logo--2i1Iz">
+                                        <div class="checkout--billing__secured--3i67y">
+                                            <div class="billing__secure-connection">
+                                                <span class="secure-connection__icon udi udi-lock">                     
+                                                </span>
+                                                <span class="secure-connection__text">Secure<br>Connection
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                     <div id="payment-request-button"
                          data-track-type="click"
                          data-track-event="edx.bi.ecommerce.basket.payment_selected"

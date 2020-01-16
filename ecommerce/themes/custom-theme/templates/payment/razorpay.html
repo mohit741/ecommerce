@@ -24,8 +24,6 @@
         "buttontext": "Pay with Razorpay",
         "name": "{{name}}",
         "description": "{{description}}",
-        "image": "{{logo_url}}",
-        "theme.color": "{{theme_color}}",
         "order_id": "{{ order_id }}",
         "handler": function (response){
             var url = "{% url 'razorpay:razorpay-success-response' basket_id=basket.id %}";
