@@ -399,6 +399,11 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
+        'razorpay': {
+            'handlers': ['console', 'local'],
+            'level': 'DEBUG',
+            'propagate': False
+        },
         '': {
             'handlers': ['console', 'local'],
             'level': 'DEBUG',
@@ -595,7 +600,7 @@ THEME_SCSS = 'sass/themes/default.scss'
 RECEIPT_PAGE_PATH = '/checkout/receipt/'
 
 # URL for Discovery Service
-COURSE_CATALOG_API_URL = 'http://localhost:8008/api/v1/'
+COURSE_CATALOG_API_URL = 'http://localhost:18130/api/v2/'
 
 # Black-listed course modes not allowed to create coupons with
 BLACK_LIST_COUPON_COURSE_MODES = [u'audit', u'honor']
@@ -635,7 +640,7 @@ EDX_DRF_EXTENSIONS = {
     'JWT_PAYLOAD_MERGEABLE_USER_ATTRIBUTES': (
         'tracking_context',
     ),
-    'OAUTH2_USER_INFO_URL': 'http://127.0.0.1:8000/oauth2/user_info',
+    'OAUTH2_USER_INFO_URL': 'http://127.0.0.1:18000/oauth2/user_info',
     'ENABLE_SET_REQUEST_USER_FOR_JWT_COOKIE': True,
 }
 
@@ -651,7 +656,7 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 # ENTERPRISE APP CONFIGURATION
 # URL for Enterprise service
-ENTERPRISE_SERVICE_URL = 'http://localhost:8000/enterprise/'
+ENTERPRISE_SERVICE_URL = 'http://localhost:18000/enterprise/'
 # Cache enterprise response from Enterprise API.
 ENTERPRISE_API_CACHE_TIMEOUT = 300  # Value is in seconds
 
@@ -792,7 +797,7 @@ CACHES = {
 }
 BACKEND_SERVICE_EDX_OAUTH2_KEY = "ecommerce-backend-service-key"
 BACKEND_SERVICE_EDX_OAUTH2_SECRET = "ecommerce-backend-service-secret"
-BACKEND_SERVICE_EDX_OAUTH2_PROVIDER_URL = "http://127.0.0.1:8000/oauth2"
+BACKEND_SERVICE_EDX_OAUTH2_PROVIDER_URL = "http://localhost:18000/oauth2"
 EXTRA_APPS = []
 API_ROOT = None
 

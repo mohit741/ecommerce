@@ -44,10 +44,10 @@ EDX_DRF_EXTENSIONS:
         full_name: full_name
         tracking_context: tracking_context
         user_id: lms_user_id
-    OAUTH2_USER_INFO_URL: http://edx.devstack.lms:18000/oauth2/user_info
+    OAUTH2_USER_INFO_URL: http://localhost:18000/oauth2/user_info
 ENABLE_COMPREHENSIVE_THEMING: false
 ENROLLMENT_FULFILLMENT_TIMEOUT: 7
-ENTERPRISE_SERVICE_URL: http://edx.devstack.lms:18000/enterprise/
+ENTERPRISE_SERVICE_URL: http://localhost:18000/enterprise/
 EXTRA_APPS: []
 JWT_AUTH:
     JWT_ALGORITHM: HS256
@@ -103,8 +103,8 @@ PAYMENT_PROCESSOR_CONFIG:
             transaction_key: SET-ME-PLEASE
         paypal:
             cancel_url: /checkout/cancel-checkout/
-            client_id: SET-ME-PLEASE
-            client_secret: SET-ME-PLEASE
+            client_id: AQSVOFX30wOSrnBkZQUfTYO6uoArgBtNzgbzmlAucjVlu7w5hX6egeiNClVuQoqSK5udfDdGZyWquYXU
+            client_secret: EKzhTOaJY3jJWk5dQglza6s-wyGJAAUXLjwKwya495ymceDNU4IMqUGEK9jLLqVkCwybF4kMH7H1G-eF
             error_url: /checkout/error/
             mode: sandbox
             receipt_url: /checkout/receipt/
@@ -114,18 +114,18 @@ SAILTHRU_SECRET: sailthru secret here
 SECRET_KEY: Your secret key here
 SESSION_COOKIE_SECURE: true
 SESSION_EXPIRE_AT_BROWSER_CLOSE: false
-SOCIAL_AUTH_EDX_OAUTH2_ISSUER: http://127.0.0.1:8000
+SOCIAL_AUTH_EDX_OAUTH2_ISSUER: http://localhost:18000
 SOCIAL_AUTH_EDX_OAUTH2_KEY: ecommerce-sso-key
 SOCIAL_AUTH_EDX_OAUTH2_LOGOUT_URL: http://localhost:18000/logout
 SOCIAL_AUTH_EDX_OAUTH2_SECRET: ecommerce-sso-secret
-SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT: http://127.0.0.1:8000
+SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT: http://localhost:18000
 SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY: ecommerce-secret
 SOCIAL_AUTH_EDX_OIDC_ISSUER: http://localhost:18000/oauth2
 SOCIAL_AUTH_EDX_OIDC_KEY: ecommerce-key
 SOCIAL_AUTH_EDX_OIDC_LOGOUT_URL: http://localhost:18000/logout
 SOCIAL_AUTH_EDX_OIDC_PUBLIC_URL_ROOT: http://localhost:18000/oauth2
 SOCIAL_AUTH_EDX_OIDC_SECRET: ecommerce-secret
-SOCIAL_AUTH_EDX_OIDC_URL_ROOT: http://edx.devstack.lms:18000/oauth2
+SOCIAL_AUTH_EDX_OIDC_URL_ROOT: http://localhost:18000/oauth2
 SOCIAL_AUTH_REDIRECT_IS_HTTPS: false
 STATICFILES_STORAGE: ecommerce.theming.storage.ThemeStorage
 STATIC_ROOT: /edx/var/ecommerce/staticfiles

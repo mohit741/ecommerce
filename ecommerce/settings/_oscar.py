@@ -45,6 +45,8 @@ OSCAR_INITIAL_LINE_STATUS = LINE.OPEN
 
 # This dict defines the new order statuses than an order can move to
 OSCAR_ORDER_STATUS_PIPELINE = {
+    ORDER.PENDING: (ORDER.OPEN, ORDER.PAYMENT_ERROR),
+    ORDER.PAYMENT_ERROR: (),
     ORDER.OPEN: (ORDER.COMPLETE, ORDER.FULFILLMENT_ERROR),
     ORDER.FULFILLMENT_ERROR: (ORDER.COMPLETE,),
     ORDER.COMPLETE: ()
@@ -103,6 +105,7 @@ PAYMENT_PROCESSORS = (
     'ecommerce.extensions.payment.processors.cybersource.Cybersource',
     'ecommerce.extensions.payment.processors.paypal.Paypal',
     'ecommerce.extensions.payment.processors.stripe.Stripe',
+    'ecommerce.extensions.payment.processors.razorpay.RazorPay',
 )
 
 PAYMENT_PROCESSOR_RECEIPT_PATH = '/checkout/receipt/'

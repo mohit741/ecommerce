@@ -39,6 +39,7 @@
 
 {% block content %}
     <main id="main-content" aria-label="Checkout" tabindex=-1>
+	<a class="btn btn-submit" href="{% url 'razorpay:razorpay-direct-payment'%}">Pay with RazorPay</a>
         <div class="basket {% if enable_client_side_checkout %}basket-client-side{% endif %}">
             <div class="container">
                 {# Use a partial template so that AJAX can be used to re-render basket #}
