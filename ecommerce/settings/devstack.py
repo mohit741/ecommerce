@@ -44,6 +44,12 @@ CORS_ALLOW_HEADERS = corsheaders_default_headers + (
     'use-jwt-cookie',
 )
 CORS_ALLOW_CREDENTIALS = True
+# RazorPay Credentials
+RAZORPAY_API_KEY = 'rzp_test_1hxE0rkPwIdgRa'
+RAZORPAY_API_SECRET = 'KivP0PFv72oxfxkQRIUurs8r'
+'''RAZORPAY_VENDOR_NAME =
+RAZORPAY_DESCRIPTION =
+RAZORPAY_VENDOR_LOGO = '''
 
 # PAYMENT PROCESSING
 PAYMENT_PROCESSOR_CONFIG = {
@@ -58,6 +64,10 @@ PAYMENT_PROCESSOR_CONFIG = {
             'sop_access_key': 'a3b04486204c3032ad1bf1d7b90ab799',
             'sop_secret_key': 'cd341f912c1a4de390d95b28ce50c04e743478a908294357bfa8eaad4ccd8d0706a6e294d2024d50881bdf986be76e9eea046968324047dd9b1e772e0a9db09caa145adbeaca4b7da7b4859a433f494cb637b488756943ccb08463914dc5ae7ec2ff1a96ce1d4663ad172414171f1001ed619076c9dd4e4297737e428c92c956',
             'sop_payment_page_url': 'https://testsecureacceptance.cybersource.com/silent/pay',
+        },
+        'razorpay':{
+            'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
+            'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
         },
         'paypal': {
             'mode': 'sandbox',
