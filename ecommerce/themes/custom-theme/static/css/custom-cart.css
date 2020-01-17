@@ -1,0 +1,215 @@
+.product-name
+{
+
+}
+#summary
+{
+	float: right;
+}
+#payment-information
+{
+	border-left: none !important;
+	
+}
+#summary
+{
+	max-width: 30% !important;
+	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+	margin-left: 3%;
+	margin-right: 3%;
+	padding-top: 2% !important;
+	padding-bottom: 2% !important;
+	margin-top: 7%;
+}
+img.thumbnail
+{
+	max-width: 50px !important;
+	max-height: 50px !important;
+}
+.product-image
+{
+	width: auto !important;
+}
+#summary *
+{
+	margin-bottom: 0px !important;
+	padding-bottom: 1.5% !important;
+}
+
+#purchase-text {
+    font-size: 15px;
+    margin-bottom: 5% !important;
+}
+.form-item.col-md-6 {
+    height: 5.0rem !important;
+}
+.form-group.col-md-6 {
+
+    height: 5.0rem !important;
+
+}
+#id_code:focus
+{
+	border-color: skyblue !important;
+    background: #FFF !important;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
+}
+@media only screen and (max-width: 770px)
+{
+	#summary
+	{
+		float: none;
+		max-width: 100% !important;
+		margin-right: 3%;
+		margin-top: 0;
+	}
+	#payment-button
+	{
+	    width: 100% !important;
+	    position:initial !important;
+	    right:0px !important;
+	    top:0px !important;
+    }
+}
+@media only screen and (min-width: 1366px)
+{
+	#payment-button
+	{
+		width: 18vw !important;
+		
+	}
+}
+#card-holder-information input
+{
+	border-radius: 2px !important;
+}
+#card-holder-information input:focus
+{
+	border-color: skyblue !important;
+    background: #FFF !important;
+    font: normal 300 1.3rem/1.6rem "Roboto","Times New Roman",Times,serif !important;
+}	
+#card-details input
+{
+	border-radius: 2px !important;
+}
+#card-details input:focus
+{
+	border-color: skyblue !important;
+    background: #FFF !important;
+    font: normal 300 1.3rem/1.6rem "Roboto","Times New Roman",Times,serif !important;
+}
+#payment-method-region 
+{
+    margin-bottom: 2%;
+}
+#card-holder-information-region 
+{
+    margin-bottom: 1%;
+}
+#exp-month , #exp-year
+{
+	
+	width: 45%;
+	padding: 0px !important;
+
+}
+#exp-month
+{
+	margin-right: 5% !important;
+}
+#exp-year
+{
+	margin-left:5% ;
+}
+#expiration-label
+{
+	padding-left: 0px !important;
+}
+#card-details
+{
+	padding: 0px !important;
+}
+#billing-information-region 
+{
+    margin: 0px !important;
+}
+#payment-button
+{
+	width: 26vw;
+	position: relative;
+	right:-147%;
+	top:-150px;
+	background: #2ecc71 !important;
+}
+#payment-button:hover
+{
+	background: #065683 !important;
+}
+.control-label::after
+{
+	
+}
+
+#cardholder_name::after,#card-number::after,#expiration-label::after,#card-cvn::after,.control-label.requiredField::after
+{
+	content: "*";
+	color: red;
+}
+#Billing-details
+{
+	display: none;
+}
+#card-holder-information
+{
+	display: none;
+}
+#payment-button
+{
+	display: none;
+}
+#card-details
+{
+	display: none;
+}
+#card-payment-thumbnail
+{
+	display: none;
+}
+#razorpay
+{
+	border: 1px solid#a7a4a4;
+	border-radius: 5px;
+	background-color:#fff;
+    width: 160px;
+    height: 50px;
+    background: 
+}
+#razorpay-logo
+{
+	all:unset !important;
+	width: 100% !important;
+	height: 100% !important;
+	margin: 0px !important;
+	padding: 0px !important;
+	object-fit: cover;
+}
+.btn.payment-button.payment-processor-paypal
+{
+	width: 160px !important;
+}
+input:checked +.qrcode-payment
+{
+	display: none;
+}
+.qrcode-payment
+{
+
+}
+input#mobile-pay:checked +.qrcode-payment
+{
+	display:block;
+}
+.online-payment {
+    margin-bottom: 10px;
+}
