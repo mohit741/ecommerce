@@ -12,7 +12,6 @@
 {% block navbar %}
     {% include 'edx/partials/_student_navbar.html' %}
 {% endblock navbar %}
-
 {% block pre_app_js %}
   {# Right now, dynamic discounts only apply to single verified certs #}
   {% if formset_lines_data|length == 1 %}
@@ -23,12 +22,15 @@
   {% endif %}
 {% endblock %}
 
+
 {% block javascript %}
   <script src="{% static 'js/apps/basket_app.js' %}"></script>
 
   <script>
     window.paymentErrorPath = "{% url 'payment_error' %}";
   </script>
+
+
 {% endblock %}
 
 {% block skip_link %}
@@ -38,8 +40,66 @@
 {% endblock skip_link %}
 
 {% block content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    var options = {
+        "key": "",
+        "amount": "",
+        "buttontext": "Pay with Razorpay",
+        "name": "",
+        "description": "",
+        "order_id": "",
+        "prefill": {
+            "email": ""
+        },
+        "modal": {
+            "ondismiss": function(){
+                var url = "{% url 'razorpay:razorpay-cancel-response' basket_id=basket.id %}";
+                window.location = url;
+            }
+        },
+        "notes": {
+            "txn_id": ""
+        }
+    };
+	$("#rz-pay").click(function(e){
+		e.preventDefault();
+		$.ajax({
+        		url: "{% url 'razorpay:razorpay-direct-payment'%}",
+        		type: 'get',
+        		dataType: 'JSON',
+        		success: function(response){
+            			options["key"]= response["rz_key"];
+        			options["amount"]= response["amount"];
+        			options["name"]= response["name"];
+        			options["description"]= response["description"];
+        			options["order_id"]= response["order_id"];
+				options["prefill"]["email"]= response["email"];
+				options["notes"]["txn_id"]= response["txn_id"];
+				options["handler"]= function (resp){
+            				var url = "{% url 'razorpay:razorpay-success-response' basket_id=basket.id %}";
+            				var params = {
+                				'rz_id': resp.razorpay_payment_id,
+                				'txn_id': response["txn_id"]
+            				};
+            				window.location = url + "?" + $.param(params);
+        			};
+				console.log(options);
+    				var rzp = new Razorpay(options);
+    				rzp.open();
+        		},
+			error: function(err){
+				console.log(err);
+			}
+    		});	
+	
+	});
+});
+</script>
     <main id="main-content" aria-label="Checkout" tabindex=-1>
-	<a class="btn btn-submit" href="{% url 'razorpay:razorpay-direct-payment'%}">Pay with RazorPay</a>
+	<a id="rz-pay" class="btn btn-submit" href="">Pay with RazorPay</a>
         <div class="basket {% if enable_client_side_checkout %}basket-client-side{% endif %}">
             <div class="container">
                 {# Use a partial template so that AJAX can be used to re-render basket #}

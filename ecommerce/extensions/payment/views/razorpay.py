@@ -11,6 +11,7 @@ from django.utils import six
 from django.utils.translation import ugettext_lazy as _
 from django.utils.decorators import method_decorator
 from django.db import transaction
+from django.http import JsonResponse
 
 from oscar.apps.payment.exceptions import UnableToTakePayment
 from oscar.core.loading import get_class, get_model
@@ -84,7 +85,8 @@ class PaymentView(EdxOrderPlacementMixin, View):
 
             logger.info("Starting payment for basket #%s", basket.id)
             context = self._start_razorpay_txn(basket)
-            return render(request, self.template_name, context)
+            return JsonResponse(context, status=201)
+            # return render(request, self.template_name, context)
 
     def _start_razorpay_txn(self, basket, **kwargs):
         """
@@ -106,7 +108,7 @@ class PaymentView(EdxOrderPlacementMixin, View):
         order_id = facade.create_razorpay_order(amount, currency)
         txn = facade.start_razorpay_txn(basket, order_total.incl_tax, user, email, order_id)
         context = {
-            "basket": basket,
+            # "basket": basket,
             "amount": amount,  # amount in paisa as int
             "rz_key": settings.RAZORPAY_API_KEY,
             "order_id": order_id,
