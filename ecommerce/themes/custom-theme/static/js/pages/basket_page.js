@@ -100,6 +100,7 @@ define([
                         event.preventDefault();
                         BasketPage.appendCardHolderValidationErrorMsg($(field), gettext('This field is required'));
                         $('.payment-form').attr('data-has-error', true);
+                         
                     }
                 });
 
@@ -143,6 +144,7 @@ define([
 
                 if (!CreditCardUtils.isValidCardNumber(cardNumber)) {
                     BasketPage.appendCardValidationErrorMsg(event, $number, gettext('Invalid card number'));
+
                 } else if (_.isUndefined(cardType) || !BasketPage.isCardTypeSupported(cardType.name)) {
                     BasketPage.appendCardValidationErrorMsg(event, $number, gettext('Unsupported card type'));
                 } else if (cvnNumber.length !== cardType.cvnLength || !Number.isInteger(Number(cvnNumber))) {
