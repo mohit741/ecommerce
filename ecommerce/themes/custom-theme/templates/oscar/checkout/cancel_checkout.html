@@ -14,6 +14,16 @@
 
 {% block content %}
 <link rel="stylesheet" href="/static/custom-theme/css/custom-cancel-checkout.css" type="text/css" media="all">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script>
+    $(document).ready()
+    {
+        var delay = 10000;
+        var url="http://localhost:18130/basket/";
+        $("#redir").innerHTML=delay;
+        setTimeout(function(){ window.location = url; }, delay);
+    }
+</script>
 <div class="container content-wrapper receipt-cancel-error" id="Checkout-cancel-message">
     <h1>{% trans "Checkout Cancelled!" as tmsg %}{{ tmsg | force_escape }}</h1>
      <p id="redir">
@@ -31,6 +41,4 @@
 </div>
 {% endblock content %}
 <script type="text/javascript">
-    alert("JS");
-    window.location.replace("http://localhost/basket");
 </script>
