@@ -99,7 +99,6 @@ class BasketAddItemsView(APIView):
             skus = self._get_skus(request)
             products = self._get_products(request, skus)
             voucher = self._get_voucher(request)
-
             logger.info('Starting payment flow for user [%s] for products [%s].', request.user.username, skus)
 
             available_products = self._get_available_products(request, products)
