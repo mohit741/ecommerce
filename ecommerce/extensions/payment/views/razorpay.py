@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 import logging
+import requests
 
 from django.views.generic import RedirectView, View
 from django.conf import settings
@@ -15,6 +16,8 @@ from django.http import JsonResponse
 
 from oscar.apps.payment.exceptions import UnableToTakePayment
 from oscar.core.loading import get_class, get_model
+
+# from lms.djangoapps.shoppingcart.models import Order, PaidCourseRegistration
 
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
@@ -94,6 +97,7 @@ class PaymentView(EdxOrderPlacementMixin, View):
         """
         if basket.is_empty:
             raise EmptyBasketException()
+        logger.info("SKU : %s", basket.lines.first().product.stockrecords.first().partner_sku)
         shipping_method = NoShippingRequired()
         shipping_charge = shipping_method.calculate(basket)
         order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
@@ -107,8 +111,13 @@ class PaymentView(EdxOrderPlacementMixin, View):
             user = None
         order_id = facade.create_razorpay_order(amount, currency)
         txn = facade.start_razorpay_txn(basket, order_total.incl_tax, user, email, order_id)
+        sku = 'many'
+        if basket.num_lines==1:
+            sku = basket.lines.first().product.stockrecords.first().partner_sku
         context = {
             # "basket": basket,
+            "user": user.username,
+            "sku": sku,
             "amount": amount,  # amount in paisa as int
             "rz_key": settings.RAZORPAY_API_KEY,
             "order_id": order_id,

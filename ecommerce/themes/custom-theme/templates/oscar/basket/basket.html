@@ -84,7 +84,37 @@ $(document).ready(function(){
                 				'rz_id': resp.razorpay_payment_id,
                 				'txn_id': response["txn_id"]
             				};
-            				window.location = url + "?" + $.param(params);
+					var cart_url="";
+					var cart_data={};
+					if(response["sku"]!="many"){
+						cart_url = "http://localhost:18000/shoppingcart/remove_item_ajax/";
+						cart_data = {'sku':response["sku"], 'user':response["user"]};
+					}
+					else{
+						cart_url = "http://localhost:18000/shoppingcart/clear_ajax/";
+						cart_data = {'user':response["user"]};
+					}					
+					try{
+						$.ajax({
+        						url: cart_url,
+        						type: 'post',
+							data: cart_data,
+        						dataType: 'html',
+							success: function(resp){
+								console.log(resp);
+								window.location = url + "?" + $.param(params);
+							},
+        						error: function(err){
+								console.log(err);
+								window.location = url + "?" + $.param(params);
+							}
+						});
+					}
+					catch(error){
+						console.log(error);
+						window.location = url + "?" + $.param(params);
+					}
+            				
         			};
 				console.log(options);
     				var rzp = new Razorpay(options);
@@ -96,11 +126,11 @@ $(document).ready(function(){
     		});	
 	
 	});
+
 });
 </script>
 <script type="text/javascript">
 
-  console.log("alert")
   $(document).ready(function(){
       $(".qrcode-payment").hide();
     // Hide displayed paragraphs
