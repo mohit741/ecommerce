@@ -342,8 +342,8 @@ class BasketLogicMixin(object):
 
         if product.is_seat_product:
             course_data['course_key'] = CourseKey.from_string(product.attr.course_key)
-
-        try:
+        # TODO Workaround as Discovery service is not working 
+        """try:
             course = get_course_info_from_catalog(self.request.site, product)
             try:
                 course_data['image_url'] = course['image']['src']
@@ -363,8 +363,11 @@ class BasketLogicMixin(object):
             logger.exception(
                 'Failed to retrieve data from Discovery Service for course [%s].',
                 course_data['course_key'],
-            )
-
+            )"""
+        course_data['product_title'] = product.course.name
+        course_data['product_description'] = product.description
+        course_data['image_url'] = product.course.thumbnail_url
+        
         return course_data, course
 
     @newrelic.agent.function_trace()
