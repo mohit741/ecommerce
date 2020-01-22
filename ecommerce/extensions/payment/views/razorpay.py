@@ -84,6 +84,7 @@ class PaymentView(EdxOrderPlacementMixin, View):
         else:
             # Freeze the basket so it can't be edited while the customer is
             # making the payment
+            basket.strategy = Selector().strategy(request,user=request.user)
             basket.freeze()
 
             logger.info("Starting payment for basket #%s", basket.id)
@@ -216,6 +217,7 @@ class SuccessResponseView(PaymentDetailsView, EdxOrderPlacementMixin):
         except Exception:  # pylint: disable=broad-except
             # any errors here will be logged in the create_order method. If we wanted any
             # Paypal specific logging for this error, we would do that here.
+            logger.info('------------------Order not formed in Razorpay SuccessResponseView---------------------------')
             return redirect(receipt_url)
 
         try:
@@ -232,8 +234,8 @@ class SuccessResponseView(PaymentDetailsView, EdxOrderPlacementMixin):
         except Basket.DoesNotExist:
             return None
         # Assign strategy to basket instance
-        if Selector:
-            basket.strategy = Selector().strategy(self.request)
+        logger.info('---------------------------self.request----------------------------[%s]',self.request.user)
+        basket.strategy = Selector().strategy(request=self.request,user=self.request.user)
         # Re-apply any offers
         Applicator().apply(request=self.request, basket=basket)
         return basket

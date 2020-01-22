@@ -215,7 +215,7 @@ class StockRecordSerializer(serializers.ModelSerializer):
 
     class Meta(object):
         model = StockRecord
-        fields = ('id', 'product', 'partner', 'partner_sku', 'price_currency', 'price_excl_tax',)
+        fields = ('id', 'product', 'partner', 'partner_sku', 'price_currency', 'price_excl_tax')
 
 
 class PartialStockRecordSerializerForUpdate(StockRecordSerializer):
@@ -481,7 +481,7 @@ class SeatProductHelper(object):
             raise serializers.ValidationError(_(u"Products must have a price."))
 
     @staticmethod
-    def save(course, product, create_enrollment_code):
+    def save(course, product, create_enrollment_code): #TODO
         attrs = _flatten(product['attribute_values'])
 
         # Extract arguments required for Seat creation, deserializing as necessary.
