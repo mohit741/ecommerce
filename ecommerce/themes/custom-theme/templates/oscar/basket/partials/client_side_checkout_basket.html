@@ -19,12 +19,12 @@
                 {{ form.id }}
                 <div class="product row" data-sku={{line_data.sku}}>
                     <div class="product-image col-sm-5 col-xs-5">
-                       <!-- <img class="thumbnail" src="{{ line_data.image_url|default_if_none:'' }}" alt=""/>-->
-                       <img class="thumbnail" src="${course_image_url(course)}" alt=""/>
+                       <img class="thumbnail" src="https://i.udemycdn.com/course/240x135/762616_7693_3.jpg"
+			{# { line_data.image_url|default_if_none:'' } #} alt=""/>
                     </div>
                     <div class="product-information col-sm-7 col-xs-7">
                         <p class="product-name">{{ line_data.product_title }}</p>
-                        {% include 'oscar/basket/partials/seat_type.html' %}
+                        {# % include 'oscar/basket/partials/seat_type.html' % #}
                     </div>
                     {% if line_data.enrollment_code %}
                         <div class="col-sm-12 col-xs-12 form-inline quantity-group">
