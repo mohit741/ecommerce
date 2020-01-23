@@ -2,7 +2,7 @@
 from __future__ import absolute_import, unicode_literals
 
 from decimal import Decimal
-
+import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
@@ -30,6 +30,7 @@ Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')
 Order = get_model('order', 'Order')
 
+logger = logging.getLogger('payment')
 
 class FreeCheckoutView(EdxOrderPlacementMixin, RedirectView):
     """ View to handle free checkouts.
@@ -202,6 +203,7 @@ class ReceiptResponseView(ThankYouView):
 
     def get_payment_method(self, order):
         source = order.sources.first()
+        logger.info('-------------------------------------Source-Payment-------------------------[%s]',source)
         if source:
             if source.card_type:
                 return '{type} {number}'.format(
