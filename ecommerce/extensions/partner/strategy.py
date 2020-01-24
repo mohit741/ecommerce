@@ -5,6 +5,7 @@ import logging
 from django.utils import timezone
 from oscar.apps.partner import availability, strategy
 from oscar.core.loading import get_model
+from oscar.apps.partner import prices
 from decimal import Decimal as D
 from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
 
@@ -12,7 +13,11 @@ logger = logging.getLogger(__name__)
 
 # TODO Remove unneccessary logging
 # Add GST for Indian customers -mohit741
-class IncludeGST(strategy.FixedRateTax):
+
+class INRPricingPolicy(prices.Base):
+    currency = 'INR'
+
+class IncludeGST(strategy.FixedRateTax, INRPricingPolicy):
     rate = D('0.18')
 
 class CourseSeatAvailabilityPolicyMixin(strategy.StockRequired):
@@ -61,13 +66,12 @@ class DefaultStrategy(strategy.UseFirstStockRecord, CourseSeatAvailabilityPolicy
 # Use IndiaStrategy if country is IN else use Default with no tax -mohit741
 class Selector(object):
     def strategy(self, request=None, user=None, **kwargs):  # pylint: disable=unused-argument
-        if hasattr(request, 'user'):
+        if request is not None:
             try:
                 if user is not None and not user.is_anonymous :
-                    logger.info('------------------Retrieving profile with user [%s]---------------------------',user)
+                    logger.info('--------------------Retrieving profile with user [%s] at Strategy Selector-------------------------',user)
                     profile = request.user.account_details(request)
                     country = profile['country']
-                    logger.info('------------------Country [%s]---------------------------',country)
                     if country == 'IN':
                         logger.info('------------------Indian strategy called---------------------------')
                         return IndiaStrategy()
