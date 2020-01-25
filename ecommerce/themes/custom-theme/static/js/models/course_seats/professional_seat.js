@@ -11,7 +11,8 @@ define([
                 {
                     certificate_type: 'professional',
                     id_verification_required: false,
-                    price: 1000
+                    price: 1000,
+		    inr_price: 5000
                 }
             )
         }, {seatType: 'professional'});

@@ -8,8 +8,10 @@ from oscar.core.loading import get_model
 from oscar.apps.partner import prices
 from decimal import Decimal as D
 from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
+from ecommerce.core.models import User
 
 logger = logging.getLogger(__name__)
+
 
 # TODO Remove unneccessary logging
 # Add GST for Indian customers -mohit741
@@ -68,13 +70,19 @@ class Selector(object):
     def strategy(self, request=None, user=None, **kwargs):  # pylint: disable=unused-argument
         if request is not None:
             try:
-                if user is not None and not user.is_anonymous :
-                    logger.info('--------------------Retrieving profile with user [%s] at Strategy Selector-------------------------',user)
-                    profile = request.user.account_details(request)
-                    country = profile['country']
-                    if country == 'IN':
-                        logger.info('------------------Indian strategy called---------------------------')
-                        return IndiaStrategy()
+                if user is not None and not user.is_anonymous: # Performance improvement : Call lms api only when user.country is None, and save it. -mohit741
+                    if user.country is None or user.country == '':
+                        profile = request.user.account_details(request)
+                        _user = User.objects.get(username=user.username)
+                        _user.country = profile['country']
+                        _user.save()
+                        logger.info('----------------------------------------Called Save Profile--------------------------------------')
+                        if profile['country'] == 'IN':
+                            return IndiaStrategy()
+                    else:
+                        if user.country == 'IN':
+                            logger.info('---------------------------------Indian strategy called-------------------------------------')
+                            return IndiaStrategy()
             except Exception:
                 raise
         logger.info('------------------Default strategy called---------------------------')

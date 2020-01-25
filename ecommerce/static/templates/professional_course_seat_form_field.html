@@ -13,6 +13,13 @@
                 <input type="number" class="form-control" name="price" id="price" min="5" step="1" pattern="\d+"
                        value="<%= price %>">
             </div>
+	    <label for="inr_price"><%= gettext('Price (in INR)') %></label>
+
+            <div class="input-group">
+                <div class="input-group-addon">₹</div>
+                <input type="number" class="form-control" name="inr_price" id="inr_price" min="5" step="1" pattern="\d+"
+                       value="<%= price %>">
+            </div>
             <!-- NOTE: This help-block is here for validation messages. -->
             <span class="help-block"></span>
         </div>
@@ -28,7 +35,7 @@
                 <input id="expires" name="expires" class="form-control add-pikaday"
                        aria-describedby="expiresHelpBlock" disabled="disabled">
             </div>
-            <!-- NOTE: This help-block is here for validation messages. -->
+            <!-- NOTE: This help-block is here for validation messages. updated-->
             <span class="help-block"></span>
         <span id="expiresHelpBlock" class="help-block">
             <%= gettext('After this date/time, students can no longer enroll in this track.') %>
