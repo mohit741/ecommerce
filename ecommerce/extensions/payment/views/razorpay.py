@@ -103,7 +103,6 @@ class PaymentView(EdxOrderPlacementMixin, View):
         order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
         user = self.request.user
         amount = int(order_total.incl_tax * 100)
-        currency = getattr(settings, 'RAZORPAY_CURRENCY', 'INR')
         is_indian = False
         if self.request.user.is_authenticated():
             email = self.request.user.email
@@ -115,6 +114,7 @@ class PaymentView(EdxOrderPlacementMixin, View):
         else:
             email = self.build_submission()['order_kwargs']['guest_email']
             user = None
+        currency = 'INR' # TODO change when international payments work if is_indian else 'USD'
         order_id = facade.create_razorpay_order(amount, currency)
         txn = facade.start_razorpay_txn(basket, order_total.incl_tax, user, email, order_id)
         sku = 'many'
@@ -135,7 +135,7 @@ class PaymentView(EdxOrderPlacementMixin, View):
             "order_id": order_id,
             "email": email,
             "txn_id": txn.txnid,
-            "name": getattr(settings, "RAZORPAY_VENDOR_NAME", "My Store"),
+            "name": getattr(settings, "RAZORPAY_VENDOR_NAME", "Midha Education Pvt Ltd"),
             "description": getattr(
                 settings, "RAZORPAY_DESCRIPTION", "Amazing Product"
             ),

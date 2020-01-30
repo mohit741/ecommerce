@@ -12,18 +12,19 @@ define([
             certificateType: 'professional',
             idVerificationRequired: false,
             seatType: 'professional',
+            template: _.template(FieldTemplate),
 	    bindings: {
                 'input[name=certificate_type]': 'certificate_type',
+                'input[name=inr_price]': {
+                    observe: 'inr_price',
+                    setOptions: {
+                        validate: false
+                    }
+                },
                 'input[name=price]': {
                     observe: 'price',
                     setOptions: {
                         validate: true
-                    }
-                },
-		'input[name=inr_price]': {
-                    observe: 'inr_price',
-                    setOptions: {
-                        validate: false
                     }
                 },
                 'input[name=expires]': {
@@ -36,8 +37,7 @@ define([
                     observe: 'id_verification_required',
                     onSet: 'cleanIdVerificationRequired'
                 }
-            },
-            template: _.template(FieldTemplate)
+            }
         });
     }
 );
