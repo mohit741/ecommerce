@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 import logging
 import requests
 
@@ -98,33 +98,44 @@ class PaymentView(EdxOrderPlacementMixin, View):
         """
         if basket.is_empty:
             raise EmptyBasketException()
-        logger.info("SKU : %s", basket.lines.first().product.stockrecords.first().partner_sku)
         shipping_method = NoShippingRequired()
         shipping_charge = shipping_method.calculate(basket)
         order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
         user = self.request.user
         amount = int(order_total.incl_tax * 100)
-        currency = getattr(settings, 'RAZORPAY_CURRENCY', 'INR')
+        is_indian = False
         if self.request.user.is_authenticated():
             email = self.request.user.email
+            try:
+                profile = self.request.user.account_details(self.request)
+                is_indian = profile['country'] == 'IN'
+            except Exception as e:
+                logger.exception('Could not fetch user ')
         else:
             email = self.build_submission()['order_kwargs']['guest_email']
             user = None
+        currency = 'INR' # TODO change when international payments work if is_indian else 'USD'
         order_id = facade.create_razorpay_order(amount, currency)
         txn = facade.start_razorpay_txn(basket, order_total.incl_tax, user, email, order_id)
         sku = 'many'
+        # Check for user's country and update sku -mohit741
         if basket.num_lines==1:
-            sku = basket.lines.first().product.stockrecords.first().partner_sku
+            if is_indian:
+                sku = basket.lines.first().product.stockrecords.all()[1].partner_sku
+            else:
+                sku = basket.lines.first().product.stockrecords.first().partner_sku
+        logger.info('=====------------------------SkU------------------========[%s]',sku)
         context = {
             # "basket": basket,
             "user": user.username,
             "sku": sku,
+            "is_indian": is_indian,
             "amount": amount,  # amount in paisa as int
             "rz_key": settings.RAZORPAY_API_KEY,
             "order_id": order_id,
             "email": email,
             "txn_id": txn.txnid,
-            "name": getattr(settings, "RAZORPAY_VENDOR_NAME", "My Store"),
+            "name": getattr(settings, "RAZORPAY_VENDOR_NAME", "Midha Education Pvt Ltd"),
             "description": getattr(
                 settings, "RAZORPAY_DESCRIPTION", "Amazing Product"
             ),
@@ -166,9 +177,11 @@ class SuccessResponseView(PaymentDetailsView, EdxOrderPlacementMixin):
         an order.
         """
         logger.info("Success response in Razorpay")
+        self.is_indian = False
         try:
             self.rz_id = request.GET['rz_id']
             self.txn_id = request.GET['txn_id']
+            self.is_indian = request.GET['is_indian']
         except KeyError:
             # Manipulation - redirect to basket page with warning message
             logger.warning("Missing GET params on success response page")
@@ -214,6 +227,8 @@ class SuccessResponseView(PaymentDetailsView, EdxOrderPlacementMixin):
         )
         try:
             order = self.create_order(request, basket)
+            order.currency = 'INR' if self.is_indian == 'true' else 'USD'
+            order.save()
         except Exception:  # pylint: disable=broad-except
             # any errors here will be logged in the create_order method. If we wanted any
             # Paypal specific logging for this error, we would do that here.
@@ -236,6 +251,7 @@ class SuccessResponseView(PaymentDetailsView, EdxOrderPlacementMixin):
         # Assign strategy to basket instance
         logger.info('---------------------------self.request----------------------------[%s]',self.request.user)
         basket.strategy = Selector().strategy(request=self.request,user=self.request.user)
+        basket.save()
         # Re-apply any offers
         Applicator().apply(request=self.request, basket=basket)
         return basket

@@ -82,7 +82,8 @@ $(document).ready(function(){
             				var url = "{% url 'razorpay:razorpay-success-response' basket_id=basket.id %}";
             				var params = {
                 				'rz_id': resp.razorpay_payment_id,
-                				'txn_id': response["txn_id"]
+                				'txn_id': response["txn_id"],
+						'is_indian': response["is_indian"]
             				};
 					var cart_url="";
 					var cart_data={};

@@ -61,7 +61,7 @@
             <div id="line-price" class="amount row">
                 <span class="description col-xs-4 col-sm-4">{% trans "Price" as tmsg %}{{ tmsg | force_escape }}</span>
                 <span class="col-xs-4 col-sm-4"></span>
-                <span class="price col-xs-4 col-sm-4">{{basket.total_incl_tax_excl_discounts|currency:basket.currency}}</span>
+                <span class="price col-xs-4 col-sm-4">{{basket.total_excl_tax_excl_discounts|currency:basket.currency}}</span>
             </div>
         {% endif %}
         {% if basket.total_discount %}
@@ -125,6 +125,13 @@
                 {% endblock vouchers %}
             {% endif %}
         </div>
+	{% if basket.total_tax > 0.0 %}
+	<div id="basket-tax" class="row" aria-describedby="total-price-desc">
+            <span id="total-price-desc col-xs-4 col-sm-4" class="description" style="font-weight:bold;">{% trans "GST (18%)" as tmsg %}{{ tmsg | force_escape }}</span>
+            <span class="col-xs-4 col-sm-4"></span>
+            <span class="price col-xs-4 col-sm-4" style="font-weight:bold;">{{ basket.total_tax|currency:basket.currency }}</span>
+        </div>
+	{% endif %}
         <div id="basket-total" class="row" aria-describedby="total-price-desc">
             <span id="total-price-desc col-xs-4 col-sm-4" class="description">{% trans "TOTAL" as tmsg %}{{ tmsg | force_escape }}</span>
             <span class="col-xs-4 col-sm-4"></span>

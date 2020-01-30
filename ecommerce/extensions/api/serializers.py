@@ -488,7 +488,10 @@ class SeatProductHelper(object):
         certificate_type = attrs.get('certificate_type', '')
         id_verification_required = attrs['id_verification_required']
         price = Decimal(product['price'])
-
+        inr_price = product.get('inr_price')
+        if inr_price is not None:
+            inr_price = Decimal(inr_price)
+        logger.info('--------------------------------------------Atomoc Serializer ---------------------inr_price %s',inr_price)
         # Extract arguments which are optional for Seat creation, deserializing as necessary.
         expires = product.get('expires')
         expires = parse(expires) if expires else None
@@ -503,7 +506,8 @@ class SeatProductHelper(object):
             expires=expires,
             credit_provider=credit_provider,
             credit_hours=credit_hours,
-            create_enrollment_code=create_enrollment_code
+            create_enrollment_code=create_enrollment_code,
+            second_stock_price=inr_price
         )
 
         # As a convenience to our caller, provide the SKU in the returned product serialization.
