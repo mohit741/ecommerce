@@ -399,6 +399,11 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
+        'razorpay': {
+            'handlers': ['console', 'local'],
+            'level': 'DEBUG',
+            'propagate': False
+        },
         '': {
             'handlers': ['console', 'local'],
             'level': 'DEBUG',
@@ -595,7 +600,7 @@ THEME_SCSS = 'sass/themes/default.scss'
 RECEIPT_PAGE_PATH = '/checkout/receipt/'
 
 # URL for Discovery Service
-COURSE_CATALOG_API_URL = 'http://localhost:8008/api/v1/'
+COURSE_CATALOG_API_URL = 'http://localhost:18130/api/v2/'
 
 # Black-listed course modes not allowed to create coupons with
 BLACK_LIST_COUPON_COURSE_MODES = [u'audit', u'honor']

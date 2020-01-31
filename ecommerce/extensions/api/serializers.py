@@ -215,7 +215,7 @@ class StockRecordSerializer(serializers.ModelSerializer):
 
     class Meta(object):
         model = StockRecord
-        fields = ('id', 'product', 'partner', 'partner_sku', 'price_currency', 'price_excl_tax',)
+        fields = ('id', 'product', 'partner', 'partner_sku', 'price_currency', 'price_excl_tax')
 
 
 class PartialStockRecordSerializerForUpdate(StockRecordSerializer):
@@ -481,14 +481,17 @@ class SeatProductHelper(object):
             raise serializers.ValidationError(_(u"Products must have a price."))
 
     @staticmethod
-    def save(course, product, create_enrollment_code):
+    def save(course, product, create_enrollment_code): #TODO
         attrs = _flatten(product['attribute_values'])
 
         # Extract arguments required for Seat creation, deserializing as necessary.
         certificate_type = attrs.get('certificate_type', '')
         id_verification_required = attrs['id_verification_required']
         price = Decimal(product['price'])
-
+        inr_price = product.get('inr_price')
+        if inr_price is not None:
+            inr_price = Decimal(inr_price)
+        logger.info('--------------------------------------------Atomoc Serializer ---------------------inr_price %s',inr_price)
         # Extract arguments which are optional for Seat creation, deserializing as necessary.
         expires = product.get('expires')
         expires = parse(expires) if expires else None
@@ -503,7 +506,8 @@ class SeatProductHelper(object):
             expires=expires,
             credit_provider=credit_provider,
             credit_hours=credit_hours,
-            create_enrollment_code=create_enrollment_code
+            create_enrollment_code=create_enrollment_code,
+            second_stock_price=inr_price
         )
 
         # As a convenience to our caller, provide the SKU in the returned product serialization.

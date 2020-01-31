@@ -169,7 +169,7 @@ def attach_vouchers_to_coupon_product(coupon_product, vouchers, note, notify_ema
     coupon_product.save()
 
 
-def generate_sku(product, partner):
+def generate_sku(product, partner, country=None):
     """
     Generates a SKU for the given partner and and product combination.
 
@@ -184,19 +184,33 @@ def generate_sku(product, partner):
             six.text_type(partner.id)
         )).encode('utf-8')
     elif product.is_enrollment_code_product:
-        _hash = ' '.join((
-            getattr(product.attr, 'course_key', ''),
-            getattr(product.attr, 'seat_type', ''),
-            six.text_type(partner.id)
-        )).encode('utf-8')
+        if country is not None:
+            _hash = ' '.join((
+                country,
+                getattr(product.attr, 'course_key', ''),
+                getattr(product.attr, 'seat_type', ''),
+                six.text_type(partner.id)
+            )).encode('utf-8')
+        else:
+            _hash = ' '.join((
+                getattr(product.attr, 'course_key', ''),
+                getattr(product.attr, 'seat_type', ''),
+                six.text_type(partner.id)
+            )).encode('utf-8')            
     elif product.is_seat_product:
-        _hash = ' '.join((
-            getattr(product.attr, 'certificate_type', ''),
-            six.text_type(product.attr.course_key),
-            six.text_type(product.attr.id_verification_required),
-            getattr(product.attr, 'credit_provider', ''),
-            six.text_type(partner.id)
-        )).encode('utf-8')
+        if country is not None:
+            _hash = ' '.join((
+                country,
+                getattr(product.attr, 'course_key', ''),
+                getattr(product.attr, 'seat_type', ''),
+                six.text_type(partner.id)
+            )).encode('utf-8')
+        else:
+            _hash = ' '.join((
+                getattr(product.attr, 'course_key', ''),
+                getattr(product.attr, 'seat_type', ''),
+                six.text_type(partner.id)
+            )).encode('utf-8')           
     elif product.is_course_entitlement_product:
         _hash = ' '.join((
             getattr(product.attr, 'certificate_type', ''),

@@ -108,7 +108,7 @@ PAYMENT_PROCESSOR_CONFIG:
             error_url: /checkout/error/
             mode: sandbox
             receipt_url: /checkout/receipt/
-PLATFORM_NAME: Your Platform Name Here
+PLATFORM_NAME: Midha Education Pvt Ltd
 SAILTHRU_KEY: sailthru key here
 SAILTHRU_SECRET: sailthru secret here
 SECRET_KEY: Your secret key here
@@ -118,7 +118,7 @@ SOCIAL_AUTH_EDX_OAUTH2_ISSUER: http://localhost:18000
 SOCIAL_AUTH_EDX_OAUTH2_KEY: ecommerce-sso-key
 SOCIAL_AUTH_EDX_OAUTH2_LOGOUT_URL: http://localhost:18000/logout
 SOCIAL_AUTH_EDX_OAUTH2_SECRET: ecommerce-sso-secret
-SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT: http://localhost:18000
+SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT: http://edx.devstack.lms:18000
 SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY: ecommerce-secret
 SOCIAL_AUTH_EDX_OIDC_ISSUER: http://localhost:18000/oauth2
 SOCIAL_AUTH_EDX_OIDC_KEY: ecommerce-key

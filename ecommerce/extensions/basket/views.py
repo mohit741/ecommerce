@@ -99,7 +99,6 @@ class BasketAddItemsView(APIView):
             skus = self._get_skus(request)
             products = self._get_products(request, skus)
             voucher = self._get_voucher(request)
-
             logger.info('Starting payment flow for user [%s] for products [%s].', request.user.username, skus)
 
             available_products = self._get_available_products(request, products)
@@ -170,7 +169,7 @@ class BasketLogicMixin(object):
     """
 
     @newrelic.agent.function_trace()
-    def process_basket_lines(self, lines):
+    def process_basket_lines(self, lines, request=None):
         """
         Processes the basket lines and extracts information for the view's context.
         In addition determines whether:
@@ -194,7 +193,11 @@ class BasketLogicMixin(object):
             'show_voucher_form': bool(lines),
             'is_enrollment_code_purchase': False
         }
-
+        # Check if user's country is India to update line sku -mohit741
+        isIndian = False
+        if request and request.user is not None and not request.user.is_anonymous :
+            profile = request.user.account_details(request)
+            isIndian = profile['country'] == 'IN'
         lines_data = []
         for line in lines:
             product = line.product
@@ -220,9 +223,9 @@ class BasketLogicMixin(object):
 
             context_updates['order_details_msg'] = self._get_order_details_message(product)
             context_updates['switch_link_text'], context_updates['partner_sku'] = get_basket_switch_data(product)
-
+            stocks = product.stockrecords.all()
             line_data.update({
-                'sku': product.stockrecords.first().partner_sku,
+                'sku': stocks[0].partner_sku if not isIndian and len(stocks) is 1 else stocks[1].partner_sku,
                 'benefit_value': self._get_benefit_value(line),
                 'enrollment_code': product.is_enrollment_code_product,
                 'line': line,
@@ -343,8 +346,8 @@ class BasketLogicMixin(object):
 
         if product.is_seat_product:
             course_data['course_key'] = CourseKey.from_string(product.attr.course_key)
-
-        try:
+        # TODO Workaround as Discovery service is not working 
+        """try:
             course = get_course_info_from_catalog(self.request.site, product)
             try:
                 course_data['image_url'] = course['image']['src']
@@ -364,8 +367,11 @@ class BasketLogicMixin(object):
             logger.exception(
                 'Failed to retrieve data from Discovery Service for course [%s].',
                 course_data['course_key'],
-            )
-
+            )"""
+        course_data['product_title'] = product.course.name
+        course_data['product_description'] = product.description
+        course_data['image_url'] = product.course.thumbnail_url
+        
         return course_data, course
 
     @newrelic.agent.function_trace()
@@ -531,7 +537,7 @@ class BasketSummaryView(BasketLogicMixin, BasketView):
         lines = context.get('line_list', [])
         site_configuration = self.request.site.siteconfiguration
 
-        context_updates, lines_data = self.process_basket_lines(lines)
+        context_updates, lines_data = self.process_basket_lines(lines, self.request)
         context.update(context_updates)
         context.update(self.process_totals(context))
 
@@ -608,7 +614,7 @@ class PaymentApiLogicMixin(BasketLogicMixin):
         """
         Serializes the payment api response.
         """
-        context, lines_data = self.process_basket_lines(self.request.basket.all_lines())
+        context, lines_data = self.process_basket_lines(self.request.basket.all_lines(), self.request)
 
         context['order_total'] = self._get_order_total()
         context.update(self.process_totals(context))

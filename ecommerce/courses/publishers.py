@@ -45,6 +45,26 @@ class LMSPublisher(object):
             'expires': self.get_seat_expiration(seat),
         }
 
+    # Use the second stock record so that we can use this in lms to update shoppingcart. (Ecommerce-Shoppingcart integration) -mohit741
+    def serialize_seat_for_commerce_api_with_extra_stock_records(self, seat, stock_record):
+        """ Serializes a course seat product to a dict that can be further serialized to JSON. """
+
+        bulk_sku = None
+        if getattr(seat.attr, 'certificate_type', '') in ENROLLMENT_CODE_SEAT_TYPES:
+            enrollment_code = seat.course.enrollment_code_product
+            if enrollment_code:
+                bulk_sku = enrollment_code.stockrecords.first().partner_sku
+
+        return {
+            'name': mode_for_product(seat),
+            'currency': stock_record.price_currency,
+            'price': int(stock_record.price_excl_tax),
+            'sku': stock_record.partner_sku,
+            'bulk_sku': bulk_sku,
+            'expires': self.get_seat_expiration(seat),
+        }
+
+
     def publish(self, course):
         """ Publish course commerce data to LMS.
 
@@ -64,6 +84,10 @@ class LMSPublisher(object):
         name = course.name
         verification_deadline = self.get_course_verification_deadline(course)
         modes = [self.serialize_seat_for_commerce_api(seat) for seat in course.seat_products]
+        for seat in course.seat_products:
+            stockrecords = seat.stockrecords.all()
+            if len(stockrecords) > 1:
+                modes.append(self.serialize_seat_for_commerce_api_with_extra_stock_records(seat,stockrecords[1]))
 
         has_credit = 'credit' in [mode['name'] for mode in modes]
         if has_credit:
