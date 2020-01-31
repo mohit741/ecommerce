@@ -25,46 +25,23 @@
 {% endblock navbar %}
 
 {% block content %}
-  <style>
-
-  #print-extras{
-    display:none;
-  }
-
-  #auth-sign{
-    display:none;
-  }
-  @media print {
-    .quantity{
-       display: none;
+<script type="text/javascript">
+    window.onload = function(){
+        alert('Your Order is complete! You can print the receipt. \nPlease click on profile image to go back to the dashboard.')    
     }
-    #printer {
-       display: none;
-    }
-    .confirm-message {
-       display: none;
-    }
-    #print-extras{
-      display:block;
-      width: 100%;
-    }
-    #auth-sign{
-      display:block;
-      float:left;
-      height:150px;
-      width: 275px;
-    }
-    .footer{
-       display: none;
-    }
-    .thank-you{
-       display:none;
-       margin-top:5%;
-       font-size:30px;
-    }
-  }
-
-  </style>
+</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0/css/fontawesome.min.css" integrity="sha256-ioFPWUug8KobKYqJwZL3r+Ln0iv6a1AW0B/OLOKUGZY=" crossorigin="anonymous" />
+<link rel="stylesheet" href="/static/custom-theme/css/custom-receipt.css" type="text/css" media="all">
+<div class="container-fluid" id="card-header">
+  <header class="wrapper confirm-enrollment shopping-cart" id="cart-head">
+  <h1> {{platform_name}} -  Shopping Cart</h1>
+      <ol class="steps">
+          <li>Review</li>
+          <li>Payment</li>
+          <li class="active">Confirmation</li>
+      </ol>
+  </header>
+</div>
   <div id="receipt-container"
        class="receipt container content-container"
        data-currency="{{ order.currency }}"
@@ -248,6 +225,19 @@
             {% include 'oscar/checkout/_verification_data.html' %}
         </div>
       {% endif %}
+	<br>
+	<div id="cta-nav-links" class="row">
+        <div class="col-xs-12 text-right">
+          {% if not show_verification_banner %}
+          <a class="dashboard-link nav-link" href="{{ order_dashboard_url }}">
+            {% trans "Go to dashboard" as tmsg %}{{ tmsg | force_escape }}
+          </a>
+          {% endif %}
+          <a class="find-more-courses-link nav-link" href="{{ explore_courses_url }}">
+            {% trans "Find more courses" as tmsg %}{{ tmsg | force_escape }}
+          </a>
+        </div>
+      </div>
     </div>
   </div>
   <div id="auth-sign">

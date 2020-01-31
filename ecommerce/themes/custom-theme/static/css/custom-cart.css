@@ -213,3 +213,72 @@ input#mobile-pay:checked +.qrcode-payment
 .online-payment {
     margin-bottom: 10px;
 }
+
+.shopping-cart .steps {
+	margin: 0px;
+    	border: none;
+	color:whitesmoke;
+    	padding-left: 10%;
+}
+
+#cart-head {
+    	background: #505763;
+	color: whitesmoke;
+}
+
+.container-fluid {
+    width: 100%;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 0px;
+}
+
+.shopping-cart .steps li.active {
+    border-bottom: 3px solid #23a6df;
+    padding-left: 5px !important;
+    margin-left: 2% !important;
+    padding-right: 10px !important;
+}
+
+.wrapper.confirm-enrollment.shopping-cart h1 {
+    text-align: center;
+    margin: 0px;
+    padding: 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-top: 1.5%;
+    padding-bottom: 1.5%;
+    color: whitesmoke;
+    font-size: 24px;
+    line-height: 35.52px;
+}
+
+.shopping-cart .steps li {
+    padding-top: 2%;
+    padding-bottom: 2%;
+    color: whitesmoke;
+    font-size: 20px;
+    display: inline-block;
+    position: relative;
+    margin: 0 30px;
+    padding: 26px 30px;
+    padding-top: 26px;
+    padding-bottom: 26px;
+    font-weight: 400;
+}
+
+.shopping-cart .steps li::after {
+    top: auto;
+    right: -40px;
+    content: "\f178";
+    position: absolute;
+    color: #ddd;
+    font-family: FontAwesome;
+    font-weight: 100;
+    line-height: 1.42857;
+    
+}
+
+.shopping-cart .steps li:last-child::after{
+    content: none;
+}
