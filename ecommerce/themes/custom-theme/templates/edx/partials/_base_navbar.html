@@ -1,8 +1,8 @@
 {% load i18n %}
 {% load static %}
-
+<link rel="stylesheet" href="/static/custom-theme/css/custom-navbar.css" type="text/css" media="all">
 <header class="navbar navbar-default">
-  <div class="container">
+  <div id="navbar-container" class="container">
     <!-- Brand and toggle get grouped for better mobile display -->
     <div class="navbar-header">
       <button id="hamburger-button" class="navbar-toggle collapsed" data-toggle="collapse"
@@ -19,21 +19,21 @@
       <ul class="nav navbar-nav navbar-right">
         {% if user.is_authenticated %}
           <li class="btn-group user-menu">
-            <button type="button" class="btn btn-default hidden-xs main-btn nav-button"
+            <a class="btn btn-default hidden-xs main-btn nav-button"
                     onclick="window.open('{{ lms_dashboard_url }}');">
-              <i class="icon fa fa-home" aria-hidden="true"></i>
+              <img class="user-image" src="/static/custom-theme/images/profile_default_50.png" alt="">
               <span class="sr-only">{% trans "Dashboard for:" as tmsg %}{{ tmsg | force_escape }}</span>
               {{ user.username }}
-            </button>
-            <button type="button" class="btn btn-default dropdown-toggle hidden-xs nav-button"
+            </a>
+            <!--<button type="button" class="btn btn-default dropdown-toggle hidden-xs nav-button"
                     data-toggle="dropdown"
                     aria-haspopup="true">
-              <span class="caret"></span>
+              <span class="fa fa-caret-down" aria-hidden="true"></span>
               <span class="sr-only">{% trans "Toggle Dropdown" as tmsg %}{{ tmsg | force_escape }}</span>
             </button>
             <ul class="dropdown-menu" aria-expanded="false">
               {% block dropdown_menu %}{% endblock dropdown_menu %}
-            </ul>
+            </ul> -->
               {% block small_dropdown_menu %}{% endblock small_dropdown_menu %}
           </li>
         {% else %}
