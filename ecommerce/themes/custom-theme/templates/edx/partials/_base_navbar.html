@@ -25,6 +25,9 @@
               <span class="sr-only">{% trans "Dashboard for:" as tmsg %}{{ tmsg | force_escape }}</span>
               {{ user.username }}
             </a>
+	    <a id="power-off" href="{% url 'logout' %}" style="font-size:1.5em; color:red; margin-left: 70%; margin-top: 3%;">
+		<i class="fa fa-power-off" data-toggle="tooltip" data-placement="bottom" title="Logout"></i>
+	    </a>
             <!--<button type="button" class="btn btn-default dropdown-toggle hidden-xs nav-button"
                     data-toggle="dropdown"
                     aria-haspopup="true">
@@ -36,6 +39,8 @@
             </ul> -->
               {% block small_dropdown_menu %}{% endblock small_dropdown_menu %}
           </li>
+	<div class="mobile-nav-item hidden-mobile nav-item">
+	</div>
         {% else %}
           <a class="btn btn-primary navbar-btn hidden-xs" href="{% url 'login' %}">{% trans "Login" as tmsg %}{{ tmsg | force_escape }}</a>
           <li class="visible-xs"><a class="nav-link" href="{% url 'login' %}">{% trans "Login" as tmsg %}{{ tmsg | force_escape }}</a></li>

@@ -7,6 +7,7 @@ from django.conf import settings
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib import messages
 from django.core.urlresolvers import reverse
+from django.core import serializers
 from django.http import HttpResponseRedirect
 from django.utils import six
 from django.utils.translation import ugettext_lazy as _
@@ -39,7 +40,7 @@ Source = get_model('payment', 'Source')
 SourceType = get_model('payment', 'SourceType')
 
 
-Applicator = get_class('offer.applicator', 'Applicator')
+CustomApplicator = get_class('offer.applicator', 'CustomApplicator')
 
 logger = logging.getLogger('razorpay')
 
@@ -86,7 +87,6 @@ class PaymentView(EdxOrderPlacementMixin, View):
             # making the payment
             basket.strategy = Selector().strategy(request,user=request.user)
             basket.freeze()
-
             logger.info("Starting payment for basket #%s", basket.id)
             context = self._start_razorpay_txn(basket)
             return JsonResponse(context, status=201)
@@ -124,7 +124,6 @@ class PaymentView(EdxOrderPlacementMixin, View):
                 sku = basket.lines.first().product.stockrecords.all()[1].partner_sku
             else:
                 sku = basket.lines.first().product.stockrecords.first().partner_sku
-        logger.info('=====------------------------SkU------------------========[%s]',sku)
         context = {
             # "basket": basket,
             "user": user.username,
@@ -203,7 +202,7 @@ class SuccessResponseView(PaymentDetailsView, EdxOrderPlacementMixin):
             return HttpResponseRedirect(reverse('basket:summary'))
 
         # Reload frozen basket which is specified in the URL
-        kwargs['basket'] = self.load_frozen_basket(kwargs['basket_id'])
+        kwargs['basket'] = self.load_frozen_basket(kwargs['basket_id'],request)
         if not kwargs['basket']:
             logger.warning(
                 "Unable to load frozen basket with ID %s", kwargs['basket_id'])
@@ -242,18 +241,17 @@ class SuccessResponseView(PaymentDetailsView, EdxOrderPlacementMixin):
 
         return redirect(receipt_url)
 
-    def load_frozen_basket(self, basket_id):
+    def load_frozen_basket(self, basket_id, request):
         # Lookup the frozen basket that this txn corresponds to
         try:
             basket = Basket.objects.get(id=basket_id, status=Basket.FROZEN)
         except Basket.DoesNotExist:
             return None
         # Assign strategy to basket instance
-        logger.info('---------------------------self.request----------------------------[%s]',self.request.user)
         basket.strategy = Selector().strategy(request=self.request,user=self.request.user)
+        # Re-apply any offers -Use CustomApplicator by openedx -mohit741
+        CustomApplicator().apply(request=request, basket=basket, user=request.user)
         basket.save()
-        # Re-apply any offers
-        Applicator().apply(request=self.request, basket=basket)
         return basket
 
     def build_submission(self, **kwargs):

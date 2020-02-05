@@ -169,6 +169,7 @@ class ReceiptResponseView(ThankYouView):
     def get_context_data(self, **kwargs):  # pylint: disable=arguments-differ
         context = super(ReceiptResponseView, self).get_context_data(**kwargs)
         order = context[self.context_object_name]
+        logger.info('---------------------------Order------------------------%s',order)
         has_enrollment_code_product = False
         if order.basket:
             has_enrollment_code_product = any(
