@@ -30,6 +30,7 @@
 }
 .nav.navbar-nav.navbar-right{
 	margin-right:0px;
+	width:25%;
 }
 
 .user-image {
@@ -43,7 +44,8 @@
 
 .btn-group.user-menu{
 	float: right;
-	margin: 15px 50px 0 0;
+	width: 46%;
+	margin: 15px 5px 0 0;
 }
 .btn-group.user-menu a{
 	padding:0px;
@@ -55,4 +57,11 @@
 	background-color:transparent !important;
 	color: #4a4444 !important;
 	font: inherit;
+}
+.tooltip{
+	z-index:1080;
+}
+
+#power-off:focus{
+	background-color:transparent;
 }

@@ -94,7 +94,7 @@
           </div>
 
           <div class="order-headers order-summary col-md-4">
-            <dl>
+            <dl style="margin-left: 40%;">
               <dt>{% trans "Order Number:" as tmsg %}{{ tmsg | force_escape }}</dt>
               <dd>{{ order.number }}</dd>
               {% if payment_method %}
@@ -167,7 +167,7 @@
                             {% if offer.condition.enterprise_customer_name %}
                               {% filter force_escape %}
                                 {% blocktrans trimmed with type=discount.offer.offer_type enterprise_name=discount.offer.condition.enterprise_customer_name %}
-                                    Discount of type {{ type }} provided by {{ enterprise_name }}
+                                    Discount of type {{ type }} provided by {{ platform_name }}
                                 {% endblocktrans %}
                               {% endfilter %}
                             {% elif discount.offer.condition.name == 'dynamic_discount_condition' %}
