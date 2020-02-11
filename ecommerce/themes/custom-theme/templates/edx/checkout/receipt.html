@@ -94,7 +94,7 @@
           </div>
 
           <div class="order-headers order-summary col-md-4">
-            <dl style="margin-left: 40%;">
+            <dl>
               <dt>{% trans "Order Number:" as tmsg %}{{ tmsg | force_escape }}</dt>
               <dd>{{ order.number }}</dd>
               {% if payment_method %}
@@ -153,8 +153,7 @@
 
                     {% if discount.voucher_code %}
                       {% with voucher=discount.voucher %}
-                        <span class="discount">{{ voucher.code }}</span>
-                        <span class="discount">
+                        <span class="discount">{{ voucher.code }} 
                           {% filter force_escape %}
                             {% blocktrans trimmed with voucher_code=voucher.code voucher_discount_amount=voucher.benefit|benefit_discount %}
                               {{ voucher_discount_amount }} off

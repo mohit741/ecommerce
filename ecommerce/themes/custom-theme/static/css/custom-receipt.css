@@ -40,8 +40,14 @@
     #cta-nav-links{
        display:none;
     }
+    .order-headers.order-summary.col-md-4 dl{
+       margin-left:0px;
+    }
   }
 
+.order-headers.order-summary.col-md-4 dl{
+       margin-left:20%;
+}
 .shopping-cart .steps {
 	margin: 0px;
     	border: none;
