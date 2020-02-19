@@ -151,3 +151,4 @@ upgrade: ## update the requirements/*.txt files with the latest packages satisfy
 .PHONY: help requirements migrate serve clean validate_python quality validate_js validate html_coverage e2e \
 	extract_translations dummy_translations compile_translations fake_translations pull_translations \
 	push_translations update_translations fast_validate_python clean_static production-requirements
+
