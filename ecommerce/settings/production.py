@@ -15,7 +15,7 @@ from six.moves.urllib.parse import urljoin
 from ecommerce.settings.base import *
 
 # Protocol used for construcing absolute callback URLs
-PROTOCOL = 'https'
+PROTOCOL = 'http'
 
 # Enable offline compression of CSS/JS
 COMPRESS_ENABLED = True
@@ -106,6 +106,11 @@ for __, configs in six.iteritems(PAYMENT_PROCESSOR_CONFIG):
             'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
             'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
         })
+
+
+# RAZORPAY SECRETS
+RAZORPAY_API_KEY = 'rzp_test_1hxE0rkPwIdgRa'
+RAZORPAY_API_SECRET = 'KivP0PFv72oxfxkQRIUurs8r'
 # END PAYMENT PROCESSOR OVERRIDES
 
 ENTERPRISE_API_URL = urljoin(ENTERPRISE_SERVICE_URL, 'api/v1/')
