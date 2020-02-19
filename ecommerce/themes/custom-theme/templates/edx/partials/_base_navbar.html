@@ -1,6 +1,7 @@
 {% load i18n %}
 {% load static %}
 <link rel="stylesheet" href="/static/custom-theme/css/custom-navbar.css" type="text/css" media="all">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <header class="navbar navbar-default">
   <div id="navbar-container" class="container">
     <!-- Brand and toggle get grouped for better mobile display -->
@@ -39,7 +40,8 @@
             </ul> -->
               {% block small_dropdown_menu %}{% endblock small_dropdown_menu %}
           </li>
-	<div class="mobile-nav-item hidden-mobile nav-item">
+        </ul>
+  	<div class="mobile-nav-item hidden-mobile nav-item">
 	</div>
         {% else %}
           <a class="btn btn-primary navbar-btn hidden-xs" href="{% url 'login' %}">{% trans "Login" as tmsg %}{{ tmsg | force_escape }}</a>

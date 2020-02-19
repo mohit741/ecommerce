@@ -235,7 +235,6 @@ input#mobile-pay:checked +.qrcode-payment
 
 .shopping-cart .steps li.active {
     border-bottom: 3px solid #23a6df;
-    padding-left: 5px !important;
     margin-left: 2% !important;
     padding-right: 10px !important;
 }
@@ -281,4 +280,29 @@ input#mobile-pay:checked +.qrcode-payment
 
 .shopping-cart .steps li:last-child::after{
     content: none;
+}
+
+
+/* Responsive Design */
+
+@media only screen and (max-width: 500px)
+{
+	ol.steps
+	{
+		padding-left: 0px !important;
+	}
+	ol>li
+	{
+		margin: 0px !important;
+		padding-left: 20px !important;
+		padding-right: 5px !important;
+	}
+	.shopping-cart .steps li::after
+	{
+		right: -20px !important;
+	}
+	li:first-child
+	{
+		padding-left: 5px !important;
+	}
 }
