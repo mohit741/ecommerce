@@ -110,3 +110,44 @@
 .shopping-cart .steps li:last-child::after{
     content: none;
 }
+
+
+
+
+/* Responsive Design  */
+@media only screen and (max-width: 500px)
+{
+  ol.steps
+  {
+    padding-left: 0px !important;
+  }
+  ol>li
+  {
+    margin: 0px !important;
+    padding-left: 20px !important;
+    padding-right: 5px !important;
+  }
+  .shopping-cart .steps li::after
+  {
+    right: -20px !important;
+  }
+  .shopping-cart .steps li.active 
+  {
+    border-bottom: 3px solid 
+    #23a6df;
+    padding-left: 10px !important;
+    margin-left: 2% !important;
+    padding-right: 0px !important;
+  }
+  .order-headers.order-summary.col-md-4 dl
+  {
+    margin-left: 0% !important;
+  }
+  .col-xs-12.text-right
+  {
+    display: flex;
+    text-align: left;
+    padding: 0;
+    justify-content: space-between;
+  }
+}
