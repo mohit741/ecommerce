@@ -14,6 +14,7 @@ from six.moves.urllib.parse import urljoin
 
 from ecommerce.settings.base import *
 
+DEBUG = True
 # Protocol used for construcing absolute callback URLs
 PROTOCOL = 'http'
 
@@ -39,7 +40,6 @@ def get_env_setting(setting):
     except KeyError:
         error_msg = "Set the %s env variable" % setting
         raise ImproperlyConfigured(error_msg)
-
 
 # HOST CONFIGURATION
 # See: https://docs.djangoproject.com/en/1.5/releases/1.5/#allowed-hosts-required-in-production

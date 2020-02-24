@@ -69,15 +69,17 @@ class DefaultStrategy(strategy.UseFirstStockRecord, CourseSeatAvailabilityPolicy
 class Selector(object):
     def strategy(self, request=None, user=None, **kwargs):  # pylint: disable=unused-argument
         if request is not None:
+            logger.info('---------------------User at startetgy----------------%s',request.user)
             try:
                 if user is not None and not user.is_anonymous: # Performance improvement : Call lms api only when user.country is None, and save it. -mohit741
                     if user.country is None or user.country == '':
+                        logger.info('---------------------User at startetgy----------------%s',user) 
                         profile = request.user.account_details(request)
                         _user = User.objects.get(username=user.username)
-                        _user.country = profile['country']
+                        _user.country = profile.get('country','IN')
                         _user.save()
                         logger.info('----------------------------------------Called Save Profile--------------------------------------')
-                        if profile['country'] == 'IN':
+                        if _user.country == 'IN':
                             return IndiaStrategy()
                     else:
                         if user.country == 'IN':

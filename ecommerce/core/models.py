@@ -19,6 +19,7 @@ from django.utils.translation import ugettext_lazy as _
 from edx_django_utils import monitoring as monitoring_utils
 from edx_django_utils.cache import TieredCache
 from edx_rbac.models import UserRole, UserRoleAssignment
+from edx_rest_api_client.client import get_oauth_access_token
 from edx_rest_api_client.client import EdxRestApiClient
 from jsonfield.fields import JSONField
 from requests.exceptions import ConnectionError as ReqConnectionError
@@ -403,11 +404,12 @@ class SiteConfiguration(models.Model):
             return access_token_cached_response.value
 
         url = '{root}/access_token'.format(root=self.oauth2_provider_url)
-        access_token, expiration_datetime = EdxRestApiClient.get_oauth_access_token(
+        access_token, expiration_datetime = get_oauth_access_token(
             url,
             self.oauth_settings['BACKEND_SERVICE_EDX_OAUTH2_KEY'],  # pylint: disable=unsubscriptable-object
             self.oauth_settings['BACKEND_SERVICE_EDX_OAUTH2_SECRET'],  # pylint: disable=unsubscriptable-object
-            token_type='jwt'
+            token_type='jwt',
+            grant_type='client_credentials' # 'authorization_code'
         )
 
         expires = (expiration_datetime - datetime.datetime.utcnow()).seconds
@@ -481,7 +483,7 @@ class User(AbstractUser):
     """
 
     full_name = models.CharField(_('Full Name'), max_length=255, blank=True, null=True)
-    country = models.CharField(_('Country'), max_length=10, blank=True, null=True)
+    country = models.CharField(_('Country'), max_length=10, blank=True, null=True, default='IN')
     tracking_context = JSONField(blank=True, null=True)
     email = models.EmailField(max_length=254, verbose_name='email address', blank=True, db_index=True)
     lms_user_id = models.IntegerField(

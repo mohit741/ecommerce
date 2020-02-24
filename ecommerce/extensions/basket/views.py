@@ -197,7 +197,7 @@ class BasketLogicMixin(object):
         isIndian = False
         if request and request.user is not None and not request.user.is_anonymous :
             profile = request.user.account_details(request)
-            isIndian = profile['country'] == 'IN'
+            isIndian = profile.get('country','') == 'IN'
         lines_data = []
         for line in lines:
             product = line.product

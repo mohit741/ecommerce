@@ -1,22 +1,23 @@
 ---
+# This file is created and updated by ansible, edit at your peril
+
 
 AFFILIATE_COOKIE_KEY: dev_affiliate_id
 API_ROOT: null
 BACKEND_SERVICE_EDX_OAUTH2_KEY: ecommerce-backend-service-key
-BACKEND_SERVICE_EDX_OAUTH2_PROVIDER_URL: http://localhost:18000/oauth2
+BACKEND_SERVICE_EDX_OAUTH2_PROVIDER_URL: http://www.mohitkv.codes/oauth2
 BACKEND_SERVICE_EDX_OAUTH2_SECRET: ecommerce-backend-service-secret
-BROKER_URL: amqp://celery:celery@172.17.0.2:5672
+BROKER_URL: amqp://celery:yXMgtqKHHYBirLb1tF97pf6I1P1X4VHXebO@10.128.0.6:5672
 CACHES:
     default:
         BACKEND: django.core.cache.backends.memcached.MemcachedCache
         KEY_PREFIX: ecommerce
         LOCATION:
-        - edx.devstack.memcached:11211
+        - localhost:11211
 COMPREHENSIVE_THEME_DIRS:
-- /edx/var/edx-themes/edx-themes/ecommerce
 - /edx/app/ecommerce/ecommerce/ecommerce/themes
 CORS_ALLOW_CREDENTIALS: false
-CORS_ORIGIN_WHITELIST: []
+CORS_ORIGIN_WHITELIST: ['http://www.mohitkv.codes', 'http://mohitkv.codes']
 CORS_URLS_REGEX: ''
 CSRF_COOKIE_SECURE: false
 DATABASES:
@@ -24,16 +25,16 @@ DATABASES:
         ATOMIC_REQUESTS: true
         CONN_MAX_AGE: 60
         ENGINE: django.db.backends.mysql
-        HOST: edx.devstack.mysql
+        HOST: localhost
         NAME: ecommerce
         OPTIONS:
             connect_timeout: 10
             init_command: SET sql_mode='STRICT_TRANS_TABLES'
-        PASSWORD: password
+        PASSWORD: kdfBPnRjrfiIBjET1BGiIkfuAVnnvIvOtUB
         PORT: '3306'
         USER: ecomm001
-DEFAULT_SITE_THEME: null
-ECOMMERCE_URL_ROOT: http://localhost:18130
+DEFAULT_SITE_THEME: custom-theme
+ECOMMERCE_URL_ROOT: http://shop.mohitkv.codes
 EDX_API_KEY: PUT_YOUR_API_KEY_HERE
 EDX_DRF_EXTENSIONS:
     JWT_PAYLOAD_MERGEABLE_USER_ATTRIBUTES:
@@ -44,26 +45,27 @@ EDX_DRF_EXTENSIONS:
         full_name: full_name
         tracking_context: tracking_context
         user_id: lms_user_id
-    OAUTH2_USER_INFO_URL: http://localhost:18000/oauth2/user_info
-ENABLE_COMPREHENSIVE_THEMING: false
+    OAUTH2_USER_INFO_URL: http://www.mohitkv.codes/oauth2/user_info
+ENABLE_COMPREHENSIVE_THEMING: true
 ENROLLMENT_FULFILLMENT_TIMEOUT: 7
-ENTERPRISE_SERVICE_URL: http://localhost:18000/enterprise/
+ENTERPRISE_SERVICE_URL: http://www.mohitkv.codes/enterprise/
 EXTRA_APPS: []
 JWT_AUTH:
     JWT_ALGORITHM: HS256
     JWT_AUTH_COOKIE_HEADER_PAYLOAD: edx-jwt-cookie-header-payload
     JWT_AUTH_COOKIE_SIGNATURE: edx-jwt-cookie-signature
+    JWT_AUTH_REFRESH_COOKIE: edx-jwt-refresh-cookie
     JWT_DECODE_HANDLER: ecommerce.extensions.api.handlers.jwt_decode_handler
     JWT_ISSUERS:
-    -   AUDIENCE: lms-key
-        ISSUER: http://localhost:18000/oauth2
-        SECRET_KEY: lms-secret
-    -   AUDIENCE: lms-key
+    -   AUDIENCE: SET-ME-PLEASE
+        ISSUER: http://www.mohitkv.codes/oauth2
+        SECRET_KEY: SET-ME-PLEASE
+    -   AUDIENCE: SET-ME-PLEASE
         ISSUER: ecommerce_worker
-        SECRET_KEY: lms-secret
+        SECRET_KEY: SET-ME-PLEASE
     JWT_LEEWAY: 1
     JWT_PUBLIC_SIGNING_JWK_SET: ''
-    JWT_SECRET_KEY: lms-secret
+    JWT_SECRET_KEY: SET-ME-PLEASE
     JWT_VERIFY_EXPIRATION: true
 LANGUAGE_CODE: en
 LANGUAGE_COOKIE_NAME: openedx-language-preference
@@ -102,30 +104,30 @@ PAYMENT_PROCESSOR_CONFIG:
             sop_secret_key: SET-ME-PLEASE
             transaction_key: SET-ME-PLEASE
         paypal:
-            cancel_url: /checkout/cancel-checkout/
-            client_id: AQSVOFX30wOSrnBkZQUfTYO6uoArgBtNzgbzmlAucjVlu7w5hX6egeiNClVuQoqSK5udfDdGZyWquYXU
-            client_secret: EKzhTOaJY3jJWk5dQglza6s-wyGJAAUXLjwKwya495ymceDNU4IMqUGEK9jLLqVkCwybF4kMH7H1G-eF
+            cancel_checkout_path: /checkout/cancel-checkout/
+            client_id: SET-ME-PLEASE
+            client_secret: SET-ME-PLEASE
             error_url: /checkout/error/
             mode: sandbox
             receipt_url: /checkout/receipt/
-PLATFORM_NAME: Midha Education Pvt Ltd
+PLATFORM_NAME: MidhaFin
 SAILTHRU_KEY: sailthru key here
 SAILTHRU_SECRET: sailthru secret here
-SECRET_KEY: Your secret key here
+SECRET_KEY: XNnLjtxlmIFpSRaNWI9IQWiovDaGloaavTFTcNuOcoQalRCckWOC9tNoVwj3gHka39WtvW9oZQYOwgQWGwU4OktlNnABaSuvkgB3
 SESSION_COOKIE_SECURE: true
 SESSION_EXPIRE_AT_BROWSER_CLOSE: false
-SOCIAL_AUTH_EDX_OAUTH2_ISSUER: http://localhost:18000
+SOCIAL_AUTH_EDX_OAUTH2_ISSUER: http://www.mohitkv.codes
 SOCIAL_AUTH_EDX_OAUTH2_KEY: ecommerce-sso-key
-SOCIAL_AUTH_EDX_OAUTH2_LOGOUT_URL: http://localhost:18000/logout
+SOCIAL_AUTH_EDX_OAUTH2_LOGOUT_URL: http://www.mohitkv.codes/logout
 SOCIAL_AUTH_EDX_OAUTH2_SECRET: ecommerce-sso-secret
-SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT: http://edx.devstack.lms:18000
+SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT: http://www.mohitkv.codes
 SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY: ecommerce-secret
-SOCIAL_AUTH_EDX_OIDC_ISSUER: http://localhost:18000/oauth2
+SOCIAL_AUTH_EDX_OIDC_ISSUER: http://www.mohitkv.codes/oauth2
 SOCIAL_AUTH_EDX_OIDC_KEY: ecommerce-key
-SOCIAL_AUTH_EDX_OIDC_LOGOUT_URL: http://localhost:18000/logout
-SOCIAL_AUTH_EDX_OIDC_PUBLIC_URL_ROOT: http://localhost:18000/oauth2
+SOCIAL_AUTH_EDX_OIDC_LOGOUT_URL: http://www.mohitkv.codes/logout
+SOCIAL_AUTH_EDX_OIDC_PUBLIC_URL_ROOT: http://www.mohitkv.codes/oauth2
 SOCIAL_AUTH_EDX_OIDC_SECRET: ecommerce-secret
-SOCIAL_AUTH_EDX_OIDC_URL_ROOT: http://localhost:18000/oauth2
+SOCIAL_AUTH_EDX_OIDC_URL_ROOT: http://www.mohitkv.codes/oauth2
 SOCIAL_AUTH_REDIRECT_IS_HTTPS: false
 STATICFILES_STORAGE: ecommerce.theming.storage.ThemeStorage
 STATIC_ROOT: /edx/var/ecommerce/staticfiles
