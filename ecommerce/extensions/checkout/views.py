@@ -4,7 +4,9 @@ from __future__ import absolute_import, unicode_literals
 import logging
 from decimal import Decimal
 
+
 from django.conf import settings
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
@@ -35,6 +37,7 @@ Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')
 Order = get_model('order', 'Order')
 
+logger = logging.getLogger('payment')
 
 class FreeCheckoutView(EdxOrderPlacementMixin, RedirectView):
     """ View to handle free checkouts.
@@ -167,14 +170,17 @@ class ReceiptResponseView(ThankYouView):
                 'order_history_url': request.site.siteconfiguration.build_lms_url('account/settings'),
             }
             return self.render_to_response(context=context, status=404)
-        learner_portal_url = self.add_message_if_enterprise_user(request)
+
+        '''learner_portal_url = self.add_message_if_enterprise_user(request)
         if learner_portal_url:
-            response.context_data['order_dashboard_url'] = learner_portal_url
+            response.context_data['order_dashboard_url'] = learner_portal_url'''
+        #self.add_message_if_enterprise_user(request) TODO Uncomment when enterprise url works
         return response
 
     def get_context_data(self, **kwargs):  # pylint: disable=arguments-differ
         context = super(ReceiptResponseView, self).get_context_data(**kwargs)
         order = context[self.context_object_name]
+        logger.info('---------------------------Order------------------------%s',order)
         has_enrollment_code_product = False
         if order.basket:
             has_enrollment_code_product = any(
@@ -209,6 +215,7 @@ class ReceiptResponseView(ThankYouView):
 
     def get_payment_method(self, order):
         source = order.sources.first()
+        logger.info('-------------------------------------Source-Payment-------------------------[%s]',source)
         if source:
             if source.card_type:
                 return '{type} {number}'.format(

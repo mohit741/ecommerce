@@ -35,6 +35,7 @@ JWT_AUTH.update({
 })
 
 CORS_ORIGIN_WHITELIST = (
+    'http://localhost:18000',
     'http://localhost:1991',
     'http://localhost:1996',
     'http://localhost:1998',
@@ -44,6 +45,12 @@ CORS_ALLOW_HEADERS = corsheaders_default_headers + (
     'use-jwt-cookie',
 )
 CORS_ALLOW_CREDENTIALS = True
+# RazorPay Credentials
+RAZORPAY_API_KEY = 'rzp_test_1hxE0rkPwIdgRa'
+RAZORPAY_API_SECRET = 'KivP0PFv72oxfxkQRIUurs8r'
+'''RAZORPAY_VENDOR_NAME =
+RAZORPAY_DESCRIPTION =
+RAZORPAY_VENDOR_LOGO = '''
 
 # PAYMENT PROCESSING
 PAYMENT_PROCESSOR_CONFIG = {
@@ -59,10 +66,16 @@ PAYMENT_PROCESSOR_CONFIG = {
             'sop_secret_key': '38d0c4ca3c0a49a186dbded91f523a9435ef86ddf0e8434196e5974a4ae997c40e35f6963bae468b9e34652bdc0b289fe180512fffa841ccb4ec357a1daf8cd048dec47262a64401b1c1f38e80c1cf65bf719dfd579b40bd8f7322550a270bf3c33c8aebd64f48089101cab36234426e60d0879ab7284b0dae90780bf2c4d2d9',
             'sop_payment_page_url': 'https://testsecureacceptance.cybersource.com/silent/pay',
         },
+        'razorpay':{
+            'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
+            'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
+        },
         'paypal': {
             'mode': 'sandbox',
-            'client_id': 'AVcS4ZWEk7IPqaJibex3bCR0_lykVQ2BHdGz6JWVik0PKWGTOQzWMBOHRppPwFXMCPUqRsoBUDSE-ro5',
-            'client_secret': 'EHNgP4mXL5mI54DQI1-EgXo6y0BDUzj5x1_8gQD0dNWSWS6pcLqlmGq8f5En6oos0z2L37a_EJ27mJ_a',
+            'client_id': 'AQSVOFX30wOSrnBkZQUfTYO6uoArgBtNzgbzmlAucjVlu7w5hX6egeiNClVuQoqSK5udfDdGZyWquYXU',
+            'client_secret': 'EKzhTOaJY3jJWk5dQglza6s-wyGJAAUXLjwKwya495ymceDNU4IMqUGEK9jLLqVkCwybF4kMH7H1G-eF',
+            #'client_id': 'AVcS4ZWEk7IPqaJibex3bCR0_lykVQ2BHdGz6JWVik0PKWGTOQzWMBOHRppPwFXMCPUqRsoBUDSE-ro5',
+            #'client_secret': 'EHNgP4mXL5mI54DQI1-EgXo6y0BDUzj5x1_8gQD0dNWSWS6pcLqlmGq8f5En6oos0z2L37a_EJ27mJ_a',
             'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
             'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
         },

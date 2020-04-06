@@ -10,10 +10,12 @@ from django.contrib.auth import authenticate, get_user_model, login
 from django.contrib.auth.decorators import login_required
 from django.db import DatabaseError, connection, transaction
 from django.http import Http404, JsonResponse
+from django.urls import reverse
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import View
 
+from ecommerce.extensions.dashboard.views import ExtendedIndexView
 from ecommerce.core.constants import Status
 
 try:
@@ -113,3 +115,4 @@ class LogoutView(EdxOAuth2LogoutView):
 
     def get_redirect_url(self, *args, **kwargs):
         return self.request.site.siteconfiguration.oauth_settings['SOCIAL_AUTH_EDX_OAUTH2_LOGOUT_URL']
+

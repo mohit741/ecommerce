@@ -178,7 +178,7 @@ class Paypal(BasePaymentProcessor):
                         for line in basket.all_lines()
                     ],
                 },
-                'invoice_number': basket.order_number,
+                'invoice_number': str(uuid.uuid1()),# basket.order_number,
             }],
         }
 
@@ -310,18 +310,18 @@ class Paypal(BasePaymentProcessor):
 
             logger.warning(
                 "Failed to execute PayPal payment on attempt [%d]. "
-                "PayPal's response was recorded in entry [%d].",
+                "PayPal's response was recorded in entry [%s].",
                 attempt_count,
-                entry.id
+                str(error) #entry.id
             )
 
             # After utilizing all retry attempts, raise the exception 'GatewayError'
             if attempt_count == available_attempts:
                 logger.error(
                     "Failed to execute PayPal payment [%s]. "
-                    "PayPal's response was recorded in entry [%d].",
+                    "PayPal's response was recorded in entry [%s].",
                     payment.id,
-                    entry.id
+                    str(error) #entry.id
                 )
                 raise GatewayError
 

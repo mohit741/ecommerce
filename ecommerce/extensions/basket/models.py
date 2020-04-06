@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+import logging
+
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
@@ -10,6 +12,7 @@ from oscar.core.loading import get_class
 from ecommerce.extensions.analytics.utils import track_segment_event, translate_basket_line_for_segment
 from ecommerce.extensions.basket.constants import TEMPORARY_BASKET_CACHE_KEY
 
+logger = logging.getLogger(__name__)
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 Selector = get_class('partner.strategy', 'Selector')
 
@@ -25,14 +28,15 @@ class Basket(AbstractBasket):
         return OrderNumberGenerator().order_number(self)
 
     @classmethod
-    def create_basket(cls, site, user):
+    def create_basket(cls, site, user, request=None):
         """ Create a new basket for the given site and user. """
         basket = cls.objects.create(site=site, owner=user)
-        basket.strategy = Selector().strategy(user=user)
+        # Add request as parameter to get proper strategy -mohit741
+        basket.strategy = Selector().strategy(request=request, user=user)
         return basket
 
     @classmethod
-    def get_basket(cls, user, site):
+    def get_basket(cls, user, site, request=None):
         """ Retrieve the basket belonging to the indicated user.
 
         If no such basket exists, create a new one. If multiple such baskets exist,
@@ -40,7 +44,7 @@ class Basket(AbstractBasket):
         """
         editable_baskets = cls.objects.filter(site=site, owner=user, status__in=cls.editable_statuses)
         if not editable_baskets:
-            basket = cls.create_basket(site, user)
+            basket = cls.create_basket(site, user, request=request)
         else:
             stale_baskets = list(editable_baskets)
             basket = stale_baskets.pop(0)
@@ -49,8 +53,8 @@ class Basket(AbstractBasket):
                 basket.merge(stale_basket, add_quantities=False)
 
         # Assign the appropriate strategy class to the basket
-        basket.strategy = Selector().strategy(user=user)
-
+        # Add request as parameter to get proper strategy -mohit741
+        basket.strategy = Selector().strategy(request=request, user=user)
         return basket
 
     def flush(self):

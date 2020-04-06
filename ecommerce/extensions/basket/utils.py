@@ -95,7 +95,7 @@ def prepare_basket(request, products, voucher=None):
     Returns:
         basket (Basket): Contains the product to be redeemed and the Voucher applied.
     """
-    basket = Basket.get_basket(request.user, request.site)
+    basket = Basket.get_basket(request.user, request.site, request=request)
     basket_add_enterprise_catalog_attribute(basket, request.GET)
     basket.flush()
     basket.save()
@@ -149,7 +149,7 @@ def prepare_basket(request, products, voucher=None):
             logger.warning('[Code Redemption Failure] The voucher is not valid for this basket. '
                            'User: %s, Basket: %s, Code: %s, Message: %s',
                            request.user.username, request.basket.id, voucher.code, message)
-
+    logger.info('----------------------Baket Currency------------------------ %s', basket.currency)
     attribute_cookie_data(basket, request)
     return basket
 

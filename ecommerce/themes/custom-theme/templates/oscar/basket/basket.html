@@ -1,0 +1,197 @@
+{% extends 'edx/base.html' %}
+
+{% load core_extras %}
+{% load i18n %}
+{% load django_markup %}
+{% load static %}
+
+{% block title %}
+{% trans 'Basket' as tmsg %}{{ tmsg | force_escape }}
+{% endblock title %}
+
+{% block navbar %}
+    {% include 'edx/partials/_student_navbar.html' %}
+{% endblock navbar %}
+{% block pre_app_js %}
+  {# Right now, dynamic discounts only apply to single verified certs #}
+  {% if formset_lines_data|length == 1 %}
+  <script>
+    window.lmsUrlRoot = "{{ lms_url_root }}";
+    window.courseKey = "{{ formset_lines_data.0.1.course_key }}";
+  </script>
+  {% endif %}
+{% endblock %}
+
+
+{% block javascript %}
+  <script src="{% static 'js/apps/basket_app.js' %}"></script>
+
+  <script>
+    window.paymentErrorPath = "{% url 'payment_error' %}";
+  </script>
+
+
+{% endblock %}
+
+{% block skip_link %}
+    <div id="skip-link">
+        <a href="#main-content" class="element-invisible element-focusable">Skip to main content</a>
+    </div>
+{% endblock skip_link %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0/css/fontawesome.min.css" integrity="sha256-ioFPWUug8KobKYqJwZL3r+Ln0iv6a1AW0B/OLOKUGZY=" crossorigin="anonymous" />
+<link rel="stylesheet" href="/static/custom-theme/css/custom-cart.css" type="text/css" media="all">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    var options = {
+        "key": "",
+        "amount": "",
+        "buttontext": "Pay with Razorpay",
+        "name": "",
+        "description": "",
+        "order_id": "",
+        "prefill": {
+            "email": ""
+        },
+        "modal": {
+            "ondismiss": function(){
+                var url = "{% url 'razorpay:razorpay-cancel-response' basket_id=basket.id %}";
+                window.location = url;
+            }
+        },
+        "notes": {
+            "txn_id": ""
+        }
+    };
+	$("#razorpay").click(function(e){
+		e.preventDefault();
+		$.ajax({
+        		url: "{% url 'razorpay:razorpay-direct-payment'%}",
+        		type: 'get',
+        		dataType: 'JSON',
+        		success: function(response){
+            			options["key"]= response["rz_key"];
+        			options["amount"]= response["amount"];
+        			options["name"]= response["name"];
+        			options["description"]= response["description"];
+        			options["order_id"]= response["order_id"];
+				options["prefill"]["email"]= response["email"];
+				options["notes"]["txn_id"]= response["txn_id"];
+				options["handler"]= function (resp){
+            				var url = "{% url 'razorpay:razorpay-success-response' basket_id=basket.id %}";
+            				var params = {
+                				'rz_id': resp.razorpay_payment_id,
+                				'txn_id': response["txn_id"],
+						'is_indian': response["is_indian"]
+            				};
+					var cart_url="";
+					var cart_data={};
+					if(response["sku"]!="many"){
+						cart_url = "http://localhost:18000/shoppingcart/remove_item_ajax/";
+						cart_data = {'sku':response["sku"], 'user':response["user"]};
+					}
+					else{
+						cart_url = "http://localhost:18000/shoppingcart/clear_ajax/";
+						cart_data = {'user':response["user"]};
+					}					
+					try{
+						$.ajax({
+        						url: cart_url,
+        						type: 'post',
+							data: cart_data,
+        						dataType: 'html',
+							success: function(resp){
+								console.log(resp);
+								window.location = url + "?" + $.param(params);
+							},
+        						error: function(err){
+								console.log(err);
+								window.location = url + "?" + $.param(params);
+							}
+						});
+					}
+					catch(error){
+						console.log(error);
+						window.location = url + "?" + $.param(params);
+					}
+            				
+        			};
+				console.log(options);
+    				var rzp = new Razorpay(options);
+    				rzp.open();
+        		},
+			error: function(err){
+				console.log(err);
+			}
+    		});	
+	
+	});
+
+});
+</script>
+<script type="text/javascript">
+
+  $(document).ready(function(){
+      $(".qrcode-payment").hide();
+    // Hide displayed paragraphs
+    $("#mobile-pay").click(function(){
+        $(".online-payment").hide();
+        $("#online-pay").prop('checked',false);
+        $(".qrcode-payment").show();
+    });
+    
+    // Show hidden paragraphs
+    $("#online-pay").click(function(){
+        $(".qrcode-payment").hide();
+        $("#mobile-pay").prop('checked',false);
+         $(".online-payment").show();
+    });
+});
+
+</script>
+<div class="container-fluid" id="card-header">
+  <header class="wrapper confirm-enrollment shopping-cart" id="cart-head">
+  <h1> {{ platform_name }} -  Shopping Cart</h1>
+      <ol class="steps">
+          <li>Review</li>
+          <li class="active">Payment</li>
+          <li>Confirmation</li>
+      </ol>
+  </header>
+</div>
+    <main id="main-content" aria-label="Checkout" tabindex=-1>
+        <div class="basket {% if enable_client_side_checkout %}basket-client-side{% endif %}">
+            <div class="container">
+                {# Use a partial template so that AJAX can be used to re-render basket #}
+                {% if basket.is_empty %}
+                    {% block emptybasket %}
+                        <div>
+                            <h3 style="font-weight:500; font-size:2rem;">{% trans "Your basket is empty" as tmsg %}{{ tmsg | force_escape }}</h3>
+                            {% blocktrans asvar tmsg %}
+                                If you attempted to make a purchase, you have not been charged. Return to your {link_start}{link_middle}{homepage_url}/dashboard{link_end} to try
+                                again.
+                            {% endblocktrans %}
+                            {% interpolate_html tmsg link_start='<a href="'|safe support_url=support_url|safe platform_name=platform_name|safe link_end='</a>'|safe homepage_url=homepage_url|safe link_middle='">'|safe %}
+                        </div>
+                    {% endblock %}
+                {% else %}
+                    {% if enable_client_side_checkout %}
+                        {% include 'basket/partials/client_side_checkout_basket.html' %}
+                    {% else %}
+                        {% include 'basket/partials/hosted_checkout_basket.html' %}
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </main>
+{% endblock content %}
+
+{% block post_js %}
+  {# Load payment processor code after the basket app to ensure that all neccessary hooks are in place. #}
+  {% if enable_client_side_checkout %}
+    {% include client_side_payment_processor.get_template_name %}
+  {% endif %}
+{% endblock %}
