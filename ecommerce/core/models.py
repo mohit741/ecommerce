@@ -137,12 +137,12 @@ class SiteConfiguration(models.Model):
         default=False
     )
     sdn_api_url = models.CharField(
-        verbose_name=_('US Treasury SDN API URL'),
+        verbose_name=_('[Deprecated] US Treasury SDN API URL'),
         max_length=255,
         blank=True
     )
     sdn_api_key = models.CharField(
-        verbose_name=_('US Treasury SDN API key'),
+        verbose_name=_('[Deprecated] US Treasury SDN API key'),
         max_length=255,
         blank=True
     )
@@ -490,7 +490,7 @@ class User(AbstractUser):
         help_text=_(u'LMS user id'),
     )
 
-    class Meta(object):
+    class Meta:
         get_latest_by = 'date_joined'
         db_table = 'ecommerce_user'
 
@@ -725,7 +725,7 @@ class User(AbstractUser):
 
 
 class Client(User):
-    pass
+    """ Client Model. """
 
 
 class BusinessClient(models.Model):

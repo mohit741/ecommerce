@@ -74,11 +74,11 @@ def voucher_is_valid(voucher, products, request):
         now = timezone.now()
         if voucher.start_datetime > now:
             return False, _('This coupon code is not yet valid.')
-        elif voucher.end_datetime < now:  # pragma: no cover
+        if voucher.end_datetime < now:  # pragma: no cover
             return False, _('This coupon code has expired.')
 
     # We want to display the offer page to all users, including anonymous.
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         avail, msg = voucher.is_available_to_user(request.user)
         if not avail:
             voucher_msg = msg.replace('voucher', 'coupon')
@@ -209,7 +209,10 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
             return render(
                 request,
                 template_name,
-                {'error': _('This coupon code is not valid for entitlement course product. Try a different course.')}
+                {
+                    'error': _('This coupon is not valid for purchasing a program. Try using this on an individual '
+                               'course in the program. If you need assistance, contact edX support.')
+                }
             )
 
         if enterprise_customer is not None and enterprise_customer_user_needs_consent(

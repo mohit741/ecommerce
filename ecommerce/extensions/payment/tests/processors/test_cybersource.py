@@ -18,6 +18,7 @@ from oscar.core.loading import get_model
 from oscar.test import factories
 
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.extensions.basket.tests.test_utils import TEST_BUNDLE_ID
 from ecommerce.extensions.order.models import Order
 from ecommerce.extensions.payment.exceptions import (
     ExcessivePaymentForOrderError,
@@ -99,9 +100,8 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
 
         with override_settings(PAYMENT_PROCESSOR_CONFIG=payment_processor_config):
             with self.assertRaisesMessage(
-                AssertionError,
-                'CyberSource processor must be configured for Silent Order POST and/or Secure Acceptance'
-            ):
+                    AssertionError,
+                    'CyberSource processor must be configured for Silent Order POST and/or Secure Acceptance'):
                 self.processor_class(self.site)
 
     def test_get_transaction_parameters(self):
@@ -116,14 +116,15 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
 
     def test_get_transaction_parameters_with_program(self):
         """ Verify the processor returns parameters including Level 2/3 details. """
+        bundle_id = TEST_BUNDLE_ID
         BasketAttribute.objects.update_or_create(
             basket=self.basket,
             attribute_type=BasketAttributeType.objects.get(name='bundle_identifier'),
-            value_text='test_bundle'
+            value_text=bundle_id
         )
         self.assert_correct_transaction_parameters(
             extra_parameters={
-                'merchant_defined_data1': 'program,test_bundle',
+                'merchant_defined_data1': 'program,{}'.format(bundle_id),
                 'merchant_defined_data2': 'course,a/b/c,audit'
             }
         )

@@ -6,7 +6,11 @@ import logging
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from oscar.apps.voucher.abstract_models import AbstractVoucher  # pylint: disable=ungrouped-imports
+from oscar.apps.voucher.abstract_models import (  # pylint: disable=ungrouped-imports
+    AbstractVoucher,
+    AbstractVoucherApplication
+)
+from simple_history.models import HistoricalRecords
 
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.extensions.offer.constants import OFFER_ASSIGNMENT_REVOKED, OFFER_MAX_USES_DEFAULT, OFFER_REDEEMED
@@ -141,9 +145,12 @@ class Voucher(AbstractVoucher):
             if self.num_orders or num_assignments:
                 return 0
             return max_global_applications or 1
-        else:
-            offer_max_uses = max_global_applications or OFFER_MAX_USES_DEFAULT
-            return offer_max_uses - (self.num_orders + num_assignments)
+        offer_max_uses = max_global_applications or OFFER_MAX_USES_DEFAULT
+        return offer_max_uses - (self.num_orders + num_assignments)
+
+
+class VoucherApplication(AbstractVoucherApplication):
+    history = HistoricalRecords()
 
 
 from oscar.apps.voucher.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports

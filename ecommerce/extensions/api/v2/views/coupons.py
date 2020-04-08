@@ -57,7 +57,7 @@ DEPRECATED_COUPON_CATEGORIES = ['Bulk Enrollment']
 class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
     """ Coupon resource. """
     permission_classes = (IsAuthenticated, IsAdminUser)
-    filter_class = ProductFilter
+    filterset_class = ProductFilter
 
     def get_queryset(self):
         product_filter = Product.objects.filter(
@@ -162,7 +162,8 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             title=cleaned_voucher_data['title'],
             voucher_type=cleaned_voucher_data['voucher_type'],
             program_uuid=cleaned_voucher_data['program_uuid'],
-            site=self.request.site
+            site=self.request.site,
+            sales_force_id=cleaned_voucher_data['sales_force_id'],
         )
 
     def validate_access_for_enterprise(self, request_data):
@@ -265,6 +266,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             'contract_discount_type': request_data.get('contract_discount_type'),
             'contract_discount_value': request_data.get('contract_discount_value'),
             'prepaid_invoice_amount': request_data.get('prepaid_invoice_amount'),
+            'sales_force_id': request_data.get('sales_force_id'),
         }
 
     @classmethod
@@ -453,7 +455,6 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             )
             Invoice.objects.filter(order__basket=baskets.first()).update(business_client=client)
             coupon.attr.enterprise_customer_uuid = enterprise_customer
-            coupon.save()
 
         coupon_price = request_data.get('price')
         if coupon_price:
@@ -462,11 +463,18 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         note = request_data.get('note')
         if note is not None:
             coupon.attr.note = note
-            coupon.save()
 
         if 'notify_email' in request_data:
             coupon.attr.notify_email = request_data.get('notify_email')
-            coupon.save()
+
+        sales_force_id = request_data.get('sales_force_id')
+        if sales_force_id is not None:
+            coupon.attr.sales_force_id = sales_force_id
+
+        if 'inactive' in request_data:
+            coupon.attr.inactive = request_data.get('inactive')
+
+        coupon.save()
 
         discount_value = request_data.get('contract_discount_value')
         prepaid_invoice_amount = request_data.get('prepaid_invoice_amount')

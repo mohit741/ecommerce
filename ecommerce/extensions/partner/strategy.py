@@ -63,7 +63,8 @@ class IndiaStrategy(UseSecondStockRecord, CourseSeatAvailabilityPolicyMixin,
 
 class DefaultStrategy(strategy.UseFirstStockRecord, CourseSeatAvailabilityPolicyMixin,
                       strategy.NoTax, strategy.Structured):
-    pass
+    """ Default Strategy """
+
 
 # Use IndiaStrategy if country is IN else use Default with no tax -mohit741
 class Selector(object):

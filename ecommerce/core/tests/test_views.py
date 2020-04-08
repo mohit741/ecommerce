@@ -101,7 +101,7 @@ class LogoutViewTests(TestCase):
     def _create_user(self):
         """ Create a new user. """
         user = UserFactory(username='test', password=self.PASSWORD)
-        UserSocialAuth.objects.create(user=user, provider='edx-oidc', uid=user.username)
+        UserSocialAuth.objects.create(user=user, provider='edx-oauth2', uid=user.username)
         return user
 
     def get_logout_url(self):
@@ -114,7 +114,7 @@ class LogoutViewTests(TestCase):
     def assert_authentication_status(self, is_authenticated):
         """ Verifies the authentication status of the user attached to the test client. """
         user = get_user(self.client)
-        self.assertEqual(user.is_authenticated(), is_authenticated)
+        self.assertEqual(user.is_authenticated, is_authenticated)
 
     def test_x_frame_options_header(self):
         """ Verify no X-Frame-Options header is set in the response. """

@@ -58,6 +58,7 @@ from ecommerce.extensions.basket.utils import (
     prepare_basket,
     validate_voucher
 )
+from ecommerce.extensions.experimentation.utils import add_REV1074_information_to_url_if_eligible
 from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
 from ecommerce.extensions.offer.dynamic_conditional_offer import get_percentage_from_request
 from ecommerce.extensions.offer.utils import (
@@ -825,7 +826,7 @@ class QuantityAPIView(APIView, View, PaymentApiLogicMixin):
         return self.get_payment_api_response(status=400)
 
 
-class VoucherAddLogicMixin(object):
+class VoucherAddLogicMixin:
     """
     VoucherAdd logic for adding a voucher.
     """

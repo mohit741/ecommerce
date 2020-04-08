@@ -19,7 +19,7 @@ from ecommerce.tests.factories import PartnerFactory, UserFactory
 from ecommerce.tests.mixins import Applicator, Benefit, Catalog, ProductClass, SiteMixin, Voucher
 
 
-class DiscoveryMockMixin(object):
+class DiscoveryMockMixin:
     """ Mocks for the Discovery service response. """
     def setUp(self):
         super(DiscoveryMockMixin, self).setUp()
@@ -430,13 +430,20 @@ class CouponMixin(SiteMixin):
                 type='text'
             )
 
+            factories.ProductAttributeFactory(
+                product_class=pc,
+                name='Sales Force ID',
+                code='sales_force_id',
+                type='text'
+            )
+
         return pc
 
     def create_coupon(self, benefit_type=Benefit.PERCENTAGE, benefit_value=100, catalog=None, catalog_query=None,
                       client=None, code='', course_seat_types=None, email_domains=None, enterprise_customer=None,
                       enterprise_customer_catalog=None, max_uses=None, note=None, partner=None, price=100, quantity=5,
                       title='Test coupon', voucher_type=Voucher.SINGLE_USE, course_catalog=None, program_uuid=None,
-                      start_datetime=None, end_datetime=None):
+                      start_datetime=None, end_datetime=None, sales_force_id=None):
         """Helper method for creating a coupon.
 
         Arguments:
@@ -459,6 +466,7 @@ class CouponMixin(SiteMixin):
             title(str): Title of the coupon
             voucher_type (str): Voucher type
             program_uuid (str): Program UUID
+            sales_force_id (str): Sales Force Opprtunity ID
 
         Returns:
             coupon (Coupon)
@@ -475,9 +483,8 @@ class CouponMixin(SiteMixin):
             quantity = 1
 
         with mock.patch(
-            "ecommerce.extensions.voucher.utils.get_enterprise_customer",
-            mock.Mock(return_value={'name': 'Fake enterprise'})
-        ):
+                "ecommerce.extensions.voucher.utils.get_enterprise_customer",
+                mock.Mock(return_value={'name': 'Fake enterprise'})):
             coupon = create_coupon_product(
                 benefit_type=benefit_type,
                 benefit_value=benefit_value,
@@ -500,7 +507,8 @@ class CouponMixin(SiteMixin):
                 title=title,
                 voucher_type=voucher_type,
                 program_uuid=program_uuid,
-                site=self.site
+                site=self.site,
+                sales_force_id=sales_force_id,
             )
 
         request = RequestFactory()

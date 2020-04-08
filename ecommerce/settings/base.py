@@ -66,6 +66,7 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': '',
         'ATOMIC_REQUESTS': True,
+        'CONN_MAX_AGE': 60,
     }
 }
 # END DATABASE CONFIGURATION
@@ -305,7 +306,7 @@ DJANGO_APPS = [
     # edx-drf-extensions
     'csrf.apps.CsrfAppConfig',  # Enables frontend apps to retrieve CSRF tokens.
     'rules.apps.AutodiscoverRulesConfig',
-    'xss_utils'
+    'xss_utils',
 ]
 
 # Apps specific to this project go here.
@@ -457,6 +458,7 @@ JWT_AUTH = {
     'JWT_PUBLIC_SIGNING_JWK_SET': None,
     'JWT_AUTH_COOKIE_HEADER_PAYLOAD': 'edx-jwt-cookie-header-payload',
     'JWT_AUTH_COOKIE_SIGNATURE': 'edx-jwt-cookie-signature',
+    'JWT_AUTH_HEADER_PREFIX': 'JWT',
 }
 
 # Service user for worker processes.
@@ -477,12 +479,6 @@ ENABLE_AUTO_AUTH = False
 AUTO_AUTH_USERNAME_PREFIX = 'AUTO_AUTH_'
 
 AUTHENTICATION_BACKENDS = ('auth_backends.backends.EdXOAuth2',) + AUTHENTICATION_BACKENDS
-
-# NOTE: This old auth backend is retained as a temporary fallback in order to
-# support old browser sessions that were established using OIDC.  After a few
-# days, we should be safe to remove this line, along with deleting the rest of
-# the OIDC/DOP settings and keys in the ecommerce site configurations.
-AUTHENTICATION_BACKENDS += ('auth_backends.backends.EdXOpenIdConnect',)
 
 SOCIAL_AUTH_STRATEGY = 'ecommerce.social_auth.strategies.CurrentSiteDjangoStrategy'
 
@@ -660,6 +656,8 @@ ENTERPRISE_SERVICE_URL = 'http://localhost:18000/enterprise/'
 # Cache enterprise response from Enterprise API.
 ENTERPRISE_API_CACHE_TIMEOUT = 300  # Value is in seconds
 
+ENTERPRISE_LEARNER_PORTAL_HOSTNAME = os.environ.get('ENTERPRISE_LEARNER_PORTAL_HOSTNAME', 'localhost:8734')
+
 # Name for waffle switch to use for enabling enterprise features on runtime.
 ENABLE_ENTERPRISE_ON_RUNTIME_SWITCH = 'enable_enterprise_on_runtime'
 
@@ -728,6 +726,12 @@ Expiration Date: {EXPIRATION_DATE}
 '''
 OFFER_REMINDER_EMAIL_SUBJECT = 'Reminder on edX course assignment'
 
+OFFER_ASSIGNMEN_EMAIL_TEMPLATE_BODY_MAP = {
+    'assign': OFFER_ASSIGNMENT_EMAIL_TEMPLATE,
+    'revoke': OFFER_REVOKE_EMAIL_TEMPLATE,
+    'remind': OFFER_REMINDER_EMAIL_TEMPLATE,
+}
+
 # SAILTHRU settings
 SAILTHRU_KEY = 'sailthru key here'
 SAILTHRU_SECRET = 'sailthru secret here'
@@ -739,14 +743,7 @@ ECOMMERCE_URL_ROOT = "http://localhost:8002"
 OSCAR_FROM_EMAIL = 'oscar@example.com'
 PLATFORM_NAME = 'Your Platform Name Here'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
-SOCIAL_AUTH_EDX_OIDC_KEY = 'ecommerce-key'
-SOCIAL_AUTH_EDX_OIDC_SECRET = 'ecommerce-secret'
-SOCIAL_AUTH_EDX_OIDC_URL_ROOT = 'http://127.0.0.1:8000/oauth2'
-SOCIAL_AUTH_EDX_OIDC_LOGOUT_URL = 'http://127.0.0.1:8000/logout'
-SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY = SOCIAL_AUTH_EDX_OIDC_SECRET
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
-SOCIAL_AUTH_EDX_OIDC_PUBLIC_URL_ROOT = 'http://127.0.0.1:8000/oauth2'
-SOCIAL_AUTH_EDX_OIDC_ISSUER = 'http://127.0.0.1:8000/oauth2'
 
 CORS_ORIGIN_WHITELIST = []
 CORS_URLS_REGEX = ''
@@ -808,3 +805,7 @@ PAYMENT_MICROFRONTEND_URL = None
 HUBSPOT_FORMS_API_URI = "SET-ME-PLEASE"
 HUBSPOT_PORTAL_ID = "SET-ME-PLEASE"
 HUBSPOT_SALES_LEAD_FORM_GUID = "SET-ME-PLEASE"
+
+# To check government purchase restriction lists
+SDN_CHECK_API_URL ="https://api.trade.gov/gateway/v1/consolidated_screening_list/search"
+SDN_CHECK_API_KEY = "sdn search key here"

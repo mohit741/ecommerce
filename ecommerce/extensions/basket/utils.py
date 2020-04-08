@@ -18,7 +18,6 @@ from six.moves.urllib.parse import unquote, urlencode
 from ecommerce.core.url_utils import absolute_url
 from ecommerce.courses.utils import mode_for_product
 from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
-from ecommerce.extensions.offer.constants import CUSTOM_APPLICATOR_USE_FLAG
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
 from ecommerce.extensions.payment.constants import DISABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME
@@ -26,7 +25,6 @@ from ecommerce.extensions.payment.utils import embargo_check
 from ecommerce.referrals.models import Referral
 
 Applicator = get_class('offer.applicator', 'Applicator')
-CustomApplicator = get_class('offer.applicator', 'CustomApplicator')
 Basket = get_model('basket', 'Basket')
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
@@ -119,7 +117,7 @@ def prepare_basket(request, products, voucher=None):
             )
             return basket
 
-    is_multi_product_basket = True if len(products) > 1 else False
+    is_multi_product_basket = len(products) > 1
     for product in products:
         if product.is_enrollment_code_product or \
                 not UserAlreadyPlacedOrder.user_already_placed_order(user=request.user,
@@ -456,10 +454,7 @@ def apply_offers_on_basket(request, basket):
         basket (Basket): basket object on which the offers will be applied
     """
     if not basket.is_empty:
-        if waffle.flag_is_active(request, CUSTOM_APPLICATOR_USE_FLAG):  # pragma: no cover
-            CustomApplicator().apply(basket, request.user, request)
-        else:
-            Applicator().apply(basket, request.user, request)
+        Applicator().apply(basket, request.user, request)
 
 
 @newrelic.agent.function_trace()
@@ -480,10 +475,7 @@ def apply_voucher_on_basket_and_check_discount(voucher, request, basket):
     basket.vouchers.add(voucher)
     voucher_addition.send(sender=None, basket=basket, voucher=voucher)
 
-    if waffle.flag_is_active(request, CUSTOM_APPLICATOR_USE_FLAG):  # pragma: no cover
-        CustomApplicator().apply(basket, request.user, request)
-    else:
-        Applicator().apply(basket, request.user, request)
+    Applicator().apply(basket, request.user, request)
 
     # Recalculate discounts to see if the voucher gives any
     discounts_after = basket.offer_applications

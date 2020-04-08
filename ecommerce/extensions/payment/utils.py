@@ -6,8 +6,10 @@ import re
 import requests
 import six  # pylint: disable=ungrouped-imports
 from django.conf import settings
+from django.contrib.auth import logout
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model
+from requests.exceptions import HTTPError, Timeout
 from six.moves.urllib.parse import urlencode
 
 from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
@@ -109,7 +111,7 @@ def embargo_check(user, site, products):
     """ Checks if the user has access to purchase products by calling the LMS embargo API.
 
     Args:
-        request (object): The current request
+        request : The current request
         products (list): A list of products to check access against
 
     Returns:
@@ -140,7 +142,42 @@ def embargo_check(user, site, products):
     return True
 
 
-class SDNClient(object):
+def checkSDN(request, name, city, country):
+    """
+    Performs an SDN check and returns hits of the user failures.
+    """
+    hit_count = 0
+
+    site_configuration = request.site.siteconfiguration
+    basket = Basket.get_basket(request.user, site_configuration.site)
+
+    if site_configuration.enable_sdn_check:
+        sdn_check = SDNClient(
+            api_url=settings.SDN_CHECK_API_URL,
+            api_key=settings.SDN_CHECK_API_KEY,
+            sdn_list=site_configuration.sdn_api_list
+        )
+        try:
+            response = sdn_check.search(name, city, country)
+            hit_count = response['total']
+            if hit_count > 0:
+                sdn_check.deactivate_user(
+                    basket,
+                    name,
+                    city,
+                    country,
+                    response
+                )
+                logout(request)
+        except (HTTPError, Timeout):
+            # If the SDN API endpoint is down or times out
+            # the user is allowed to make the purchase.
+            pass
+
+    return hit_count
+
+
+class SDNClient:
     """A utility class that handles SDN related operations."""
     def __init__(self, api_url, api_key, sdn_list):
         self.api_url = api_url
@@ -164,7 +201,6 @@ class SDNClient(object):
         """
         params = urlencode({
             'sources': self.sdn_list,
-            'api_key': self.api_key,
             'type': 'individual',
             'name': six.text_type(name).encode('utf-8'),
             # We are using the city as the address parameter value as indicated in the documentation:
@@ -176,9 +212,14 @@ class SDNClient(object):
             api_url=self.api_url,
             params=params
         )
+        auth_header = {'Authorization': 'Bearer {}'.format(self.api_key)}
 
         try:
-            response = requests.get(sdn_check_url, timeout=settings.SDN_CHECK_REQUEST_TIMEOUT)
+            response = requests.get(
+                sdn_check_url,
+                headers=auth_header,
+                timeout=settings.SDN_CHECK_REQUEST_TIMEOUT
+            )
         except requests.exceptions.Timeout:
             logger.warning('Connection to US Treasury SDN API timed out for [%s].', name)
             raise

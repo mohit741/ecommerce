@@ -8,6 +8,7 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from edx_rbac.decorators import permission_required
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError as ReqConnectionError
@@ -40,6 +41,7 @@ from ecommerce.extensions.api.serializers import (
     EnterpriseCouponSearchSerializer,
     NotAssignedCodeUsageSerializer,
     NotRedeemedCodeUsageSerializer,
+    OfferAssignmentEmailTemplatesSerializer,
     OfferAssignmentSummarySerializer,
     PartialRedeemedCodeUsageSerializer,
     RedeemedCodeUsageSerializer
@@ -71,6 +73,7 @@ logger = logging.getLogger(__name__)
 Order = get_model('order', 'Order')
 Line = get_model('basket', 'Line')
 OfferAssignment = get_model('offer', 'OfferAssignment')
+OfferAssignmentEmailTemplates = get_model('offer', 'OfferAssignmentEmailTemplates')
 Product = get_model('catalogue', 'Product')
 ProductClass = get_model('catalogue', 'ProductClass')
 Voucher = get_model('voucher', 'Voucher')
@@ -181,12 +184,22 @@ class EnterpriseCouponViewSet(CouponViewSet):
         enterprise_id = self.kwargs.get('enterprise_id')
         if enterprise_id:
             filter_kwargs['attribute_values__value_text'] = enterprise_id
-        return Product.objects.filter(**filter_kwargs).distinct()
+
+        coupons = Product.objects.filter(**filter_kwargs)
+
+        if self.request.query_params.get('filter') == 'active':
+            active_coupon = ~Q(attributes__code='inactive') | Q(
+                attributes__code='inactive',
+                attribute_values__value_boolean=False
+            )
+            coupons = coupons.filter(active_coupon)
+
+        return coupons.distinct()
 
     def get_serializer_class(self):
         if self.action == 'list':
             return EnterpriseCouponListSerializer
-        elif self.action == 'overview':
+        if self.action == 'overview':
             return EnterpriseCouponOverviewListSerializer
         return CouponSerializer
 
@@ -228,7 +241,8 @@ class EnterpriseCouponViewSet(CouponViewSet):
             vouchers,
             cleaned_voucher_data['note'],
             cleaned_voucher_data.get('notify_email'),
-            cleaned_voucher_data['enterprise_customer']
+            cleaned_voucher_data['enterprise_customer'],
+            cleaned_voucher_data['sales_force_id']
         )
         attach_or_update_contract_metadata_on_coupon(
             coupon_product,
@@ -708,3 +722,44 @@ class EnterpriseCouponViewSet(CouponViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class OfferAssignmentEmailTemplatesViewSet(ModelViewSet):
+    """
+    Viewset to CREATE/LIST email templates for OfferAssignment.
+    """
+    serializer_class = OfferAssignmentEmailTemplatesSerializer
+    permission_classes = (IsAuthenticated,)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('email_type', 'active')
+
+    http_method_names = ['get', 'head', 'options', 'post']
+
+    # TODO: Remove this overrided endpoint once https://openedx.atlassian.net/browse/ENT-2602 is completed
+    @permission_required(
+        'enterprise.can_assign_coupon',
+        fn=lambda request, *args, **kwargs: kwargs['enterprise_customer']
+    )
+    def list(self, request, *args, **kwargs):
+        return super(OfferAssignmentEmailTemplatesViewSet, self).list(request, *args, **kwargs)
+
+    # TODO: Remove this overrided endpoint once https://openedx.atlassian.net/browse/ENT-2602 is completed
+    @permission_required(
+        'enterprise.can_assign_coupon',
+        fn=lambda request, *args, **kwargs: kwargs['enterprise_customer']
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super(OfferAssignmentEmailTemplatesViewSet, self).retrieve(request, *args, **kwargs)
+
+    # TODO: Remove this overrided endpoint once https://openedx.atlassian.net/browse/ENT-2602 is completed
+    @permission_required(
+        'enterprise.can_assign_coupon',
+        fn=lambda request, *args, **kwargs: kwargs['enterprise_customer']
+    )
+    def create(self, request, *args, **kwargs):
+        return super(OfferAssignmentEmailTemplatesViewSet, self).create(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return OfferAssignmentEmailTemplates.objects.filter(
+            enterprise_customer=self.kwargs.get('enterprise_customer')
+        )

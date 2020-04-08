@@ -111,8 +111,8 @@ def prepare_analytics_data(user, segment_key):
         }
     }
 
-    if user.is_authenticated():
-        user_tracking_id, __, __ = parse_tracking_context(user, usage='analytics')
+    if user.is_authenticated:
+        user_tracking_id, _, __ = parse_tracking_context(user, usage='analytics')
         user_data = {
             'user': {
                 'user_tracking_id': user_tracking_id,

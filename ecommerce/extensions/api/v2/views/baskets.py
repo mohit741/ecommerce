@@ -160,7 +160,7 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
 
             requested_products = request.data.get('products')
             if requested_products:
-                is_multi_product_basket = True if len(requested_products) > 1 else False
+                is_multi_product_basket = len(requested_products) > 1
                 for requested_product in requested_products:
                     # Ensure the requested products exist
                     sku = requested_product.get('sku')
@@ -381,6 +381,7 @@ class BasketCalculateView(generics.GenericAPIView):
             with transaction.atomic():
                 basket = Basket(owner=user, site=request.site)
                 basket.strategy = Selector().strategy(user=user, request=request)
+                bundle_id = request.GET.get('bundle')
 
                 for product in products:
                     basket.add_product(product, 1)
@@ -389,7 +390,7 @@ class BasketCalculateView(generics.GenericAPIView):
                     basket.vouchers.add(voucher)
 
                 # Calculate any discounts on the basket.
-                Applicator().apply(basket, user=user, request=request)
+                Applicator().apply(basket, user=user, request=request, bundle_id=bundle_id)
 
                 discounts = []
                 if basket.offer_discounts:
@@ -465,7 +466,7 @@ class BasketCalculateView(generics.GenericAPIView):
         # validate query parameters
         if requested_username and is_anonymous:
             return HttpResponseBadRequest(_('Provide username or is_anonymous query param, but not both'))
-        elif not requested_username and not is_anonymous:
+        if not requested_username and not is_anonymous:
             logger.warning("Request to Basket Calculate must supply either username or is_anonymous query"
                            " param. Requesting user=%s. Future versions of this API will treat this "
                            "WARNING as an ERROR and raise an exception.", basket_owner.username)
@@ -517,12 +518,17 @@ class BasketCalculateView(generics.GenericAPIView):
                 skus=skus
             )
             cached_response = TieredCache.get_cached_response(cache_key)
+            logger.info('bundle debugging 1: Cache key [%s] site [%s] skus [%s] response [%s]',
+                        str(cache_key), str(request.site), str(skus), str(cached_response))
             if cached_response.is_found:
                 return Response(cached_response.value)
 
         response = self._calculate_temporary_basket_atomic(basket_owner, request, products, voucher, skus, code)
-
+        logger.info('bundle debugging 2: Cache key [%s] response [%s] skus [%s] timeout [%s]',
+                    str(cache_key), str(response), str(skus), str(settings.ANONYMOUS_BASKET_CALCULATE_CACHE_TIMEOUT))
         if response and use_default_basket:
+            logger.info('bundle debugging 3: setting cache: Cache key [%s] response [%s] skus [%s]',
+                        str(cache_key), str(response), str(skus))
             TieredCache.set_all_tiers(cache_key, response, settings.ANONYMOUS_BASKET_CALCULATE_CACHE_TIMEOUT)
 
         return Response(response)

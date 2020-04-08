@@ -1,3 +1,18 @@
 pytz==2016.10  # Pinned to preserve the status quo
-six==1.11.0  # Pinned because transifex-client==0.13.6 pins it
-urllib3<1.24  # Pinned because transifex-client==0.13.6 pins it
+urllib3>=1.24.2,<2.0.0  # Pinned because transifex-client==0.13.6 pins it
+edx-rest-api-client<2.0.0 # Because of django incompatibility
+
+# jsonfield2 > 3.0.3 dropped support for python 3.5
+jsonfield2<=3.0.3
+
+# Was causing some tox issues locally.
+virtualenv==16.7.9
+
+# 5.4 introduces test order problems that need to be resolved.
+pytest<5.4.0
+
+# BOM-1410 : drf-jwt 1.15.0 introduces migration issues.
+drf-jwt<1.15.0
+
+# drf-jwt requires drf version > 7.0
+djangorestframework<3.8.0

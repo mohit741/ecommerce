@@ -1,8 +1,12 @@
 """ Checkout related views. """
 from __future__ import absolute_import, unicode_literals
 
-from decimal import Decimal
 import logging
+from decimal import Decimal
+
+
+from django.conf import settings
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
@@ -12,6 +16,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import RedirectView, TemplateView
 from oscar.apps.checkout.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
 from oscar.core.loading import get_class, get_model
+from requests.exceptions import ConnectionError as ReqConnectionError
+from requests.exceptions import Timeout
+from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.url_utils import (
     get_lms_courseware_url,
@@ -163,6 +170,10 @@ class ReceiptResponseView(ThankYouView):
                 'order_history_url': request.site.siteconfiguration.build_lms_url('account/settings'),
             }
             return self.render_to_response(context=context, status=404)
+
+        '''learner_portal_url = self.add_message_if_enterprise_user(request)
+        if learner_portal_url:
+            response.context_data['order_dashboard_url'] = learner_portal_url'''
         #self.add_message_if_enterprise_user(request) TODO Uncomment when enterprise url works
         return response
 
@@ -260,20 +271,36 @@ class ReceiptResponseView(ThankYouView):
         return context
 
     def add_message_if_enterprise_user(self, request):
-        learner_data = fetch_enterprise_learner_data(request.site, request.user)
-        learner_data_results = learner_data.get('results')
-        if learner_data_results:
-            enterprise_customer = learner_data_results[0]['enterprise_customer']
-            enable_learner_portal = enterprise_customer['enable_learner_portal']
-            learner_portal_hostname = enterprise_customer['learner_portal_hostname']
-            if enable_learner_portal and learner_portal_hostname:
-                message = (
-                    'Your company, {enterprise_customer_name}, has a dedicated page where '
-                    'you can see all of your sponsored courses. '
-                    'Go to <a href="{scheme}://{hostname}">your learner portal</a>.'
-                ).format(
-                    enterprise_customer_name=enterprise_customer['name'],
-                    hostname=learner_portal_hostname,
-                    scheme=request.scheme
-                )
-                messages.add_message(request, messages.INFO, message, extra_tags='safe')
+        try:
+            # If enterprise feature is enabled return all the enterprise_customer associated with user.
+            learner_data = fetch_enterprise_learner_data(request.site, request.user)
+        except (ReqConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:
+            logging.exception('[enterprise learner message] Exception while retrieving enterprise learner data for'
+                              'User: %s, Exception: %s', request.user, exc)
+            return None
+
+        try:
+            enterprise_customer = learner_data['results'][0]['enterprise_customer']
+        except (IndexError, KeyError):
+            # If enterprise feature is enabled and user is not associated to any enterprise
+            return None
+
+        enable_learner_portal = enterprise_customer.get('enable_learner_portal')
+        enterprise_learner_portal_slug = enterprise_customer.get('slug')
+        if enable_learner_portal and enterprise_learner_portal_slug:
+            learner_portal_url = '{scheme}://{hostname}/{slug}'.format(
+                scheme=request.scheme,
+                hostname=settings.ENTERPRISE_LEARNER_PORTAL_HOSTNAME,
+                slug=enterprise_learner_portal_slug,
+            )
+            message = (
+                'Your company, {enterprise_customer_name}, has a dedicated page where '
+                'you can see all of your sponsored courses. '
+                'Go to <a href="{url}">your learner portal</a>.'
+            ).format(
+                enterprise_customer_name=enterprise_customer['name'],
+                url=learner_portal_url
+            )
+            messages.add_message(request, messages.INFO, message, extra_tags='safe')
+            return learner_portal_url
+        return None

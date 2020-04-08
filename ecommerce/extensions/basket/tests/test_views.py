@@ -38,6 +38,7 @@ from ecommerce.enterprise.utils import construct_enterprise_course_consent_url
 from ecommerce.extensions.analytics.utils import translate_basket_line_for_segment
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.basket.tests.mixins import BasketMixin
+from ecommerce.extensions.basket.tests.test_utils import TEST_BUNDLE_ID
 from ecommerce.extensions.basket.utils import _set_basket_bundle_status, apply_voucher_on_basket_and_check_discount
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
@@ -73,8 +74,8 @@ BUNDLE = 'bundle_identifier'
 
 
 @ddt.ddt
-class BasketAddItemsViewTests(
-        CouponMixin, DiscoveryTestMixin, DiscoveryMockMixin, LmsApiMockMixin, BasketMixin, TestCase):
+class BasketAddItemsViewTests(CouponMixin, DiscoveryTestMixin, DiscoveryMockMixin, LmsApiMockMixin, BasketMixin,
+                              EnterpriseServiceMockMixin, TestCase):
     """ BasketAddItemsView view tests. """
     path = reverse('basket:basket-add')
 
@@ -278,8 +279,27 @@ class BasketAddItemsViewTests(
         )
         self.assertEqual(basket_attribute.value_text, 'False')
 
+    @httpretty.activate
+    def test_enterprise_free_basket_redirect(self):
+        """
+        Verify redirect to FreeCheckoutView when basket is free
+        and an Enterprise-related offer is applied.
+        """
+        enterprise_offer = self.prepare_enterprise_offer()
 
-class BasketLogicTestMixin(object):
+        opts = {
+            'ec_uuid': str(enterprise_offer.condition.enterprise_customer_uuid),
+            'course_id': self.course.id,
+            'username': self.user.username,
+        }
+        self.mock_consent_get(**opts)
+
+        response = self._get_response(self.stock_record.partner_sku)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, absolute_url(self.request, 'checkout:free-checkout'))
+
+
+class BasketLogicTestMixin:
     """ Helper functions for Basket API and BasketSummaryView tests. """
     def create_empty_basket(self):
         basket = factories.BasketFactory(owner=self.user, site=self.site)
@@ -423,7 +443,7 @@ class PaymentApiResponseTestMixin(BasketLogicTestMixin):
             u'offers': offers,
             u'coupons': coupons,
             u'messages': messages if messages else [],
-            u'is_free_basket': True if order_total == 0 else False,
+            u'is_free_basket': order_total == 0,
             u'show_coupon_form': show_coupon_form,
             u'summary_discounts': summary_discounts,
             u'summary_price': summary_price,
@@ -933,8 +953,7 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         """ The view should redirect to the login page if the user is not logged in. """
         self.client.logout()
         response = self.client.get(self.path)
-        testserver_login_url = self.get_full_url(reverse(settings.LOGIN_URL))
-        expected_url = '{path}?next={next}'.format(path=testserver_login_url,
+        expected_url = '{path}?next={next}'.format(path=reverse(settings.LOGIN_URL),
                                                    next=six.moves.urllib.parse.quote(self.path))
         self.assertRedirects(response, expected_url, target_status_code=302)
 
@@ -1161,7 +1180,7 @@ class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
         BasketAttribute.objects.update_or_create(
             basket=self.basket,
             attribute_type=BasketAttributeType.objects.get(name=BUNDLE),
-            value_text='test_bundle'
+            value_text=TEST_BUNDLE_ID
         )
         messages = [{
             'message_type': u'error',
@@ -1178,7 +1197,7 @@ class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
         new_product = factories.ProductFactory(categories=[], stockrecords__partner__short_code='second')
         self.basket.add_product(product)
         self.basket.add_product(new_product)
-        _set_basket_bundle_status('test-bundle', self.basket)
+        _set_basket_bundle_status(TEST_BUNDLE_ID, self.basket)
         messages = [{
             'message_type': u'info',
             'user_message': u"Coupon code '{code}' added to basket.".format(code=voucher.code),

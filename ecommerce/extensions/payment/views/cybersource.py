@@ -44,7 +44,7 @@ from ecommerce.extensions.payment.exceptions import (
     RedundantPaymentNotificationError
 )
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
-from ecommerce.extensions.payment.utils import clean_field_value
+from ecommerce.extensions.payment.utils import checkSDN, clean_field_value
 from ecommerce.extensions.payment.views import BasePaymentSubmitView
 
 logger = logging.getLogger(__name__)
@@ -60,7 +60,7 @@ OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
 
-class CyberSourceProcessorMixin(object):
+class CyberSourceProcessorMixin:
     @cached_property
     def payment_processor(self):
         return Cybersource(self.request.site)
@@ -88,6 +88,29 @@ class CybersourceSubmitView(BasePaymentSubmitView):
         basket = data['basket']
         request = self.request
         user = request.user
+
+        hit_count = checkSDN(
+            request,
+            data['first_name'] + ' ' + data['last_name'],
+            data['city'],
+            data['country'])
+
+        if hit_count > 0:
+            logger.info(
+                'SDNCheck function called for basket [%d]. It received %d hit(s).',
+                request.basket.id,
+                hit_count,
+            )
+            response_to_return = {
+                'error': 'There was an error submitting the basket',
+                'sdn_check_failure': {'hit_count': hit_count}}
+
+            return JsonResponse(response_to_return, status=403)
+
+        logger.info(
+            'SDNCheck function called for basket [%d]. It did not receive a hit.',
+            request.basket.id,
+        )
 
         # Add extra parameters for Silent Order POST
         extra_parameters = {
@@ -405,6 +428,7 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, EdxOrderPlacementMi
         """ Logs standard payment response as exception log unless logger_function supplied. """
         message_prefix = message_prefix + ' ' if message_prefix else ''
         logger_function = logger_function if logger_function else logger.exception
+        # pylint: disable=logging-not-lazy
         logger_function(
             message_prefix +
             'CyberSource payment failed due to [%s] for transaction [%s], order [%s], and basket [%d]. '

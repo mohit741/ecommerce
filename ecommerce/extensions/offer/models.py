@@ -156,17 +156,17 @@ class Benefit(AbstractBenefit):
                         applicable_lines.remove(metadata['line'])
 
             return [(line.product.stockrecords.first().price_excl_tax, line) for line in applicable_lines]
-        else:
-            return super(Benefit, self).get_applicable_lines(offer, basket, range=range)  # pylint: disable=bad-super-call
+        return super(Benefit, self).get_applicable_lines(offer, basket, range=range)  # pylint: disable=bad-super-call
 
 
 class ConditionalOffer(AbstractConditionalOffer):
     UPDATABLE_OFFER_FIELDS = ['email_domains', 'max_uses']
     email_domains = models.CharField(max_length=255, blank=True, null=True)
+    sales_force_id = models.CharField(max_length=30, blank=True, null=True)
     site = models.ForeignKey(
-        'sites.Site', verbose_name=_('Site'), null=True, blank=True, default=None
+        'sites.Site', verbose_name=_('Site'), null=True, blank=True, default=None, on_delete=models.CASCADE
     )
-    partner = models.ForeignKey('partner.Partner', null=True, blank=True)
+    partner = models.ForeignKey('partner.Partner', null=True, blank=True, on_delete=models.CASCADE)
 
     # Do not record the slug field in the history table because AutoSlugField is not compatible with
     # django-simple-history.  Background: https://github.com/edx/course-discovery/pull/332
@@ -512,7 +512,7 @@ class OfferAssignment(TimeStampedModel):
         (OFFER_ASSIGNMENT_REVOKED, _("Code has been revoked for this user.")),
     )
 
-    offer = models.ForeignKey('offer.ConditionalOffer')
+    offer = models.ForeignKey('offer.ConditionalOffer', on_delete=models.CASCADE)
     code = models.CharField(max_length=128)
     user_email = models.EmailField()
     status = models.CharField(
@@ -523,7 +523,7 @@ class OfferAssignment(TimeStampedModel):
     voucher_application = models.ForeignKey(
         'voucher.VoucherApplication',
         null=True,
-        blank=True
+        blank=True, on_delete=models.CASCADE
     )
     history = HistoricalRecords()
 
@@ -538,6 +538,37 @@ class OfferAssignmentEmailAttempt(models.Model):
     """
     offer_assignment = models.ForeignKey('offer.OfferAssignment', on_delete=models.CASCADE)
     send_id = models.CharField(max_length=255, unique=True)
+
+
+class OfferAssignmentEmailTemplates(TimeStampedModel):
+    ASSIGN, REMIND, REVOKE = ('assign', 'remind', 'revoke')
+    EMAIL_TEMPLATE_TYPES = (
+        (ASSIGN, _('Assign')),
+        (REMIND, _('Remind')),
+        (REVOKE, _('Revoke')),
+    )
+
+    enterprise_customer = models.UUIDField(help_text=_('UUID for an EnterpriseCustomer from the Enterprise Service.'))
+    email_type = models.CharField(max_length=32, choices=EMAIL_TEMPLATE_TYPES)
+    email_greeting = models.CharField(max_length=300, blank=True, null=True)
+    email_closing = models.CharField(max_length=300, blank=True, null=True)
+    active = models.BooleanField(
+        help_text=_('Make a particular template version active.'),
+        default=True,
+    )
+
+    class Meta:
+        ordering = ('enterprise_customer', '-active',)
+        indexes = [
+            models.Index(fields=['enterprise_customer', 'email_type'])
+        ]
+
+    def __unicode__(self):
+        return "{ec}-{email_type}-{active}".format(
+            ec=self.enterprise_customer,
+            email_type=self.email_type,
+            active=self.active
+        )
 
 
 from oscar.apps.offer.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports

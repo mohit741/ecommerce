@@ -82,6 +82,7 @@ class CouponViewSetTest(CouponMixin, DiscoveryTestMixin, TestCase):
             'course_seat_types': None,
             'email_domains': None,
             'program_uuid': None,
+            'sales_force_id': None,
         }
 
     def test_clean_voucher_request_data(self):
@@ -100,6 +101,7 @@ class CouponViewSetTest(CouponMixin, DiscoveryTestMixin, TestCase):
             'category': {'name': self.category.name},
             'max_uses': 1,
             'notify_email': 'batman@gotham.comics',
+            'sales_force_id': 'salesforceid123',
         })
         view = CouponViewSet()
         cleaned_voucher_data = view.clean_voucher_request_data(self.coupon_data, self.site.siteconfiguration.partner)
@@ -131,6 +133,7 @@ class CouponViewSetTest(CouponMixin, DiscoveryTestMixin, TestCase):
             'notify_email',
             'contract_discount_type',
             'contract_discount_value',
+            'sales_force_id',
         ]
         self.assertEqual(sorted(expected_cleaned_voucher_data_keys), sorted(cleaned_voucher_data.keys()))
 
@@ -247,14 +250,13 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
     def get_response(self, method, path, data=None):
         """Helper method for sending requests and returning the response."""
         with mock.patch(
-            "ecommerce.extensions.voucher.utils.get_enterprise_customer",
-            mock.Mock(return_value={'name': 'Fake enterprise'})
-        ):
+                "ecommerce.extensions.voucher.utils.get_enterprise_customer",
+                mock.Mock(return_value={'name': 'Fake enterprise'})):
             if method == 'GET':
                 return self.client.get(path)
-            elif method == 'POST':
+            if method == 'POST':
                 return self.client.post(path, json.dumps(data), 'application/json')
-            elif method == 'PUT':
+            if method == 'PUT':
                 return self.client.put(path, json.dumps(data), 'application/json')
         return None
 
@@ -638,6 +640,18 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         new_coupon = Product.objects.get(id=self.coupon.id)
         self.assertEqual(new_coupon.attr.note, note)
 
+    def test_update_sales_force_id(self):
+        path = reverse('api:v2:coupons-detail', kwargs={'pk': self.coupon.id})
+        sales_force_id = 'otherSalesForceID123'
+        data = {
+            'id': self.coupon.id,
+            'sales_force_id': sales_force_id
+        }
+        self.get_response('PUT', path, data)
+
+        new_coupon = Product.objects.get(id=self.coupon.id)
+        self.assertEqual(new_coupon.attr.sales_force_id, sales_force_id)
+
     def test_update_dynamic_range_values(self):
         """ Verify dynamic range values are updated in case range has no catalog. """
         voucher_range = self.coupon.attr.coupon_vouchers.vouchers.first().offers.first().benefit.range
@@ -715,9 +729,8 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         benefit_value = Decimal(54)
 
         with mock.patch(
-            "ecommerce.extensions.voucher.utils.get_enterprise_customer",
-            mock.Mock(return_value={'name': 'Fake enterprise'})
-        ):
+                "ecommerce.extensions.voucher.utils.get_enterprise_customer",
+                mock.Mock(return_value={'name': 'Fake enterprise'})):
             CouponViewSet().update_offer_data(
                 request_data={'benefit_value': benefit_value},
                 vouchers=vouchers,
@@ -738,6 +751,46 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
 
         invoice = Invoice.objects.get(order__basket=basket)
         self.assertEqual(invoice.business_client.name, client_username)
+
+    def test_update_coupon_inactive(self):
+        """Test update inactive flag of Coupon, also test code_status"""
+        # test ACTIVE
+        data = {
+            'id': self.coupon.id,
+            'inactive': True
+        }
+        response_data = self.get_response_json(
+            'PUT',
+            reverse('api:v2:coupons-detail', kwargs={'pk': self.coupon.id}),
+            data=data
+        )
+        self.assertEqual(response_data['code_status'], 'INACTIVE')
+        self.assertEqual(response_data['inactive'], True)
+        self.assertEqual(self.coupon.attr.inactive, True)
+
+        # test INACTIVE
+        data['inactive'] = False
+        response_data = self.get_response_json(
+            'PUT',
+            reverse('api:v2:coupons-detail', kwargs={'pk': self.coupon.id}),
+            data=data
+        )
+        coupon = Product.objects.get(pk=self.coupon.id)  # fresh form db
+        self.assertEqual(response_data['code_status'], 'ACTIVE')
+        self.assertEqual(response_data['inactive'], False)
+        self.assertEqual(coupon.attr.inactive, False)
+
+        # test EXPIRED
+        data = {
+            'id': self.coupon.id,
+            'end_datetime': six.text_type(now() - datetime.timedelta(days=1))
+        }
+        response_data = self.get_response_json(
+            'PUT',
+            reverse('api:v2:coupons-detail', kwargs={'pk': self.coupon.id}),
+            data=data
+        )
+        self.assertEqual(response_data['code_status'], 'EXPIRED')
 
     def test_update_invoice_data(self):
         invoice = Invoice.objects.get(order__lines__product=self.coupon)
