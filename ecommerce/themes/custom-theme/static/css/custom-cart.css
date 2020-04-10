@@ -36,7 +36,16 @@ img.thumbnail
 	padding-bottom: 1.5% !important;
 	color:  #6a1b1a;
 }
-
+#apply-voucher-button
+{
+	background: #6a1b1a !important;
+	color: white !important;
+}
+#apply-voucher-button:hover
+{
+	background: #e4c481 !important;
+	color: black !important; 
+}
 #purchase-text {
     font-size: 15px;
     margin-bottom: 5% !important;

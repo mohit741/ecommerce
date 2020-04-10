@@ -110,3 +110,17 @@
 .shopping-cart .steps li:last-child::after{
     content: none;
 }
+.btn-success
+{
+  background: #6a1b1a;
+  color: white;
+}
+.btn-success:hover
+{
+  background: #e4c481;
+  color: black;
+}
+.receipt .nav-link, .receipt a,.receipt .order-summary dt,.receipt h2
+{
+  color: #6a1b1a;
+}
