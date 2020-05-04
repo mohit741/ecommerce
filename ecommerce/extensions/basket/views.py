@@ -94,7 +94,9 @@ class BasketAddItemsView(APIView):
         # Send time when this view is called - https://openedx.atlassian.net/browse/REV-984
         properties = {'emitted_at': time.time()}
         track_segment_event(request.site, request.user, 'Basket Add Items View Called', properties)
-
+        user = request.GET.get('user', None)
+        if user is not None and request.user.username != user:
+            return HttpResponseBadRequest(six.text_type('Different User is logged in to shop. Please log out first! <a href="http://shop.mohitkv.codes/logout">LogOut</a>'))
         try:
             skus = self._get_skus(request)
             products = self._get_products(request, skus)

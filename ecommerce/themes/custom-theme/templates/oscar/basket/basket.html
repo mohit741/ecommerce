@@ -90,11 +90,11 @@ $(document).ready(function(){
 					var cart_url="";
 					var cart_data={};
 					if(response["sku"]!="many"){
-						cart_url = "http://localhost:18000/shoppingcart/remove_item_ajax/";
+						cart_url = "{{ lms_url_root }}/shoppingcart/remove_item_ajax/";
 						cart_data = {'sku':response["sku"], 'user':response["user"]};
 					}
 					else{
-						cart_url = "http://localhost:18000/shoppingcart/clear_ajax/";
+						cart_url = "{{ lms_url_root }}/shoppingcart/clear_ajax/";
 						cart_data = {'user':response["user"]};
 					}					
 					try{

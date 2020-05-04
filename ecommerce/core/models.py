@@ -6,6 +6,9 @@ import logging
 
 import six  # pylint: disable=ungrouped-imports
 import waffle
+
+import requests
+
 from analytics import Client as SegmentClient
 from dateutil.parser import parse
 from django.conf import settings
@@ -35,6 +38,14 @@ from ecommerce.extensions.payment.exceptions import ProcessorNotFoundError
 from ecommerce.extensions.payment.helpers import get_processor_class, get_processor_class_by_name
 
 log = logging.getLogger(__name__)
+
+def get_access_token(user, url):
+    resp = requests.get(url, params={'user':user})
+    if resp.json().get('tok', None) is not None:
+        data = resp.json()
+        return data['tok'], data['expires_in']
+    else:
+        return '', None
 
 
 class SiteConfiguration(models.Model):
@@ -403,16 +414,18 @@ class SiteConfiguration(models.Model):
         if access_token_cached_response.is_found:
             return access_token_cached_response.value
 
-        url = '{root}/access_token'.format(root=self.oauth2_provider_url)
-        access_token, expiration_datetime = get_oauth_access_token(
-            url,
-            self.oauth_settings['BACKEND_SERVICE_EDX_OAUTH2_KEY'],  # pylint: disable=unsubscriptable-object
-            self.oauth_settings['BACKEND_SERVICE_EDX_OAUTH2_SECRET'],  # pylint: disable=unsubscriptable-object
-            token_type='jwt',
-            grant_type='client_credentials' # 'authorization_code'
-        )
-
-        expires = (expiration_datetime - datetime.datetime.utcnow()).seconds
+        try:
+            url = '{root}/access_token'.format(root=self.oauth2_provider_url)
+            access_token, expiration_datetime = get_oauth_access_token(
+                url,
+                self.oauth_settings['BACKEND_SERVICE_EDX_OAUTH2_KEY'],  # pylint: disable=unsubscriptable-object
+                self.oauth_settings['BACKEND_SERVICE_EDX_OAUTH2_SECRET'],  # pylint: disable=unsubscriptable-object
+            )
+            log.info('---------------------------------Acess Token-----------------------------%s',access_token)
+            expires = (expiration_datetime - datetime.datetime.utcnow()).seconds
+        except Exception:
+            url = self.build_lms_url('/api/user/v1/oauth2_token')
+            access_token, expires = get_access_token(user='midhafin', url=url)
         TieredCache.set_all_tiers(key, access_token, expires)
         return access_token
 
@@ -425,12 +438,12 @@ class SiteConfiguration(models.Model):
             EdxRestApiClient: The client to access the Discovery service.
         """
 
-        return EdxRestApiClient(self.discovery_api_url, jwt=self.access_token)
+        return EdxRestApiClient(self.discovery_api_url, oauth_access_token=self.access_token)
 
     @cached_property
     def embargo_api_client(self):
         """ Returns the URL for the embargo API """
-        return EdxRestApiClient(self.build_lms_url('/api/embargo/v1'), jwt=self.access_token)
+        return EdxRestApiClient(self.build_lms_url('/api/embargo/v1'), oauth_access_token=self.access_token)
 
     @cached_property
     def enterprise_api_client(self):
@@ -444,11 +457,11 @@ class SiteConfiguration(models.Model):
             EdxRestApiClient: The client to access the Enterprise service.
 
         """
-        return EdxRestApiClient(self.enterprise_api_url, jwt=self.access_token)
+        return EdxRestApiClient(self.enterprise_api_url, oauth_access_token=self.access_token)
 
     @cached_property
     def consent_api_client(self):
-        return EdxRestApiClient(self.build_lms_url('/consent/api/v1/'), jwt=self.access_token, append_slash=False)
+        return EdxRestApiClient(self.build_lms_url('/consent/api/v1/'), oauth_access_token=self.access_token, append_slash=False)
 
     @cached_property
     def user_api_client(self):
@@ -458,23 +471,23 @@ class SiteConfiguration(models.Model):
         Returns:
             EdxRestApiClient: The client to access the LMS user API service.
         """
-        return EdxRestApiClient(self.build_lms_url('/api/user/v1/'), jwt=self.access_token)
+        return EdxRestApiClient(self.build_lms_url('/api/user/v1/'), oauth_access_token=self.access_token)
 
     @cached_property
     def commerce_api_client(self):
-        return EdxRestApiClient(self.build_lms_url('/api/commerce/v1/'), jwt=self.access_token)
+        return EdxRestApiClient(self.build_lms_url('/api/commerce/v1/'), oauth_access_token=self.access_token)
 
     @cached_property
     def credit_api_client(self):
-        return EdxRestApiClient(self.build_lms_url('/api/credit/v1/'), jwt=self.access_token)
+        return EdxRestApiClient(self.build_lms_url('/api/credit/v1/'), oauth_access_token=self.access_token)
 
     @cached_property
     def enrollment_api_client(self):
-        return EdxRestApiClient(self.build_lms_url('/api/enrollment/v1/'), jwt=self.access_token, append_slash=False)
+        return EdxRestApiClient(self.build_lms_url('/api/enrollment/v1/'), oauth_access_token=self.access_token, append_slash=False)
 
     @cached_property
     def entitlement_api_client(self):
-        return EdxRestApiClient(self.build_lms_url('/api/entitlements/v1/'), jwt=self.access_token)
+        return EdxRestApiClient(self.build_lms_url('/api/entitlements/v1/'), oauth_access_token=self.access_token)
 
 
 class User(AbstractUser):
@@ -483,7 +496,7 @@ class User(AbstractUser):
     """
 
     full_name = models.CharField(_('Full Name'), max_length=255, blank=True, null=True)
-    country = models.CharField(_('Country'), max_length=10, blank=True, null=True, default='IN')
+    country = models.CharField(_('Country'), max_length=10, blank=True, null=True)
     tracking_context = JSONField(blank=True, null=True)
     email = models.EmailField(max_length=254, verbose_name='email address', blank=True, db_index=True)
     lms_user_id = models.IntegerField(
@@ -507,10 +520,14 @@ class User(AbstractUser):
             edx-oauth2  person          123
             edx-oauth2  person@edx.org  123
         """
-        try:
+        """try:
             return self.social_auth.order_by('-id').first().extra_data[u'access_token']  # pylint: disable=no-member
         except Exception:  # pylint: disable=broad-except
             return None
+        """
+        url = 'http://www.mohitkv.codes/api/user/v1/oauth2_token'
+        access_token, expires = get_access_token(self.username, url)
+        return access_token
 
     def lms_user_id_with_metric(self, usage=None, allow_missing=False):
         """
@@ -624,10 +641,14 @@ class User(AbstractUser):
             connection with the LMS account API endpoint.
         """
         try:
+            url = request.site.siteconfiguration.build_lms_url('/api/user/v1/oauth2_token')
+            user = self.username
+            oauth_token, expires = get_access_token(user, url)
             api = EdxRestApiClient(
                 request.site.siteconfiguration.build_lms_url('/api/user/v1'),
                 append_slash=False,
-                jwt=request.site.siteconfiguration.access_token
+                oauth_access_token = oauth_token
+                # jwt=request.site.siteconfiguration.access_token
             )
             response = api.accounts(self.username).get()
             return response
@@ -806,3 +827,4 @@ class EcommerceFeatureRoleAssignment(UserRoleAssignment):
         Return uniquely identifying string representation.
         """
         return self.__str__()
+
