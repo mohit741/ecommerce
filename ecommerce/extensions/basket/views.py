@@ -96,7 +96,7 @@ class BasketAddItemsView(APIView):
         track_segment_event(request.site, request.user, 'Basket Add Items View Called', properties)
         user = request.GET.get('user', None)
         if user is not None and request.user.username != user:
-            return HttpResponseBadRequest(six.text_type('Different User is logged in to shop. Please log out first! <a href="http://shop.mohitkv.codes/logout">LogOut</a>'))
+            return HttpResponseBadRequest(six.text_type(str(request.user) + ' is logged in to shop. Please log out first! <a href="http://shop.mohitkv.codes/logout">LogOut</a>'))
         try:
             skus = self._get_skus(request)
             products = self._get_products(request, skus)
