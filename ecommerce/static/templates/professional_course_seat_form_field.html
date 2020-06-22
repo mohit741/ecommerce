@@ -13,6 +13,13 @@
                 <input type="number" class="form-control" name="price" id="price" min="5" step="1" pattern="\d+"
                        value="<%= price %>">
             </div>
+	    <label for="inr_price"><%= gettext('Price (in INR)') %></label>
+
+            <div class="input-group">
+                <div class="input-group-addon">₹</div>
+                <input type="number" class="form-control" name="inr_price" id="inr_price" min="5" step="1" pattern="\d+"
+                       value="<%= price %>">
+            </div>
             <!-- NOTE: This help-block is here for validation messages. -->
             <span class="help-block"></span>
         </div>

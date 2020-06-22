@@ -513,6 +513,9 @@ class SeatProductHelper:
         certificate_type = attrs.get('certificate_type', '')
         id_verification_required = attrs['id_verification_required']
         price = Decimal(product['price'])
+        inr_price = product.get('inr_price')
+        if inr_price is not None:
+            inr_price = Decimal(inr_price)
 
         # Extract arguments which are optional for Seat creation, deserializing as necessary.
         expires = product.get('expires')
@@ -534,6 +537,7 @@ class SeatProductHelper:
             credit_hours=credit_hours,
             create_enrollment_code=create_enrollment_code,
             sku=sku,
+            second_stock_price=inr_price
         )
 
         # As a convenience to our caller, provide the SKU in the returned product serialization.

@@ -8,6 +8,8 @@ from django.db import models, transaction
 from django.db.models import Count, Q
 from django.utils.timezone import now, timedelta
 from django.utils.translation import ugettext_lazy as _
+
+from django.core.exceptions import MultipleObjectsReturned
 from oscar.core.loading import get_class, get_model
 from simple_history.models import HistoricalRecords
 
@@ -151,6 +153,7 @@ class Course(models.Model):
             remove_stale_modes=True,
             create_enrollment_code=False,
             sku=None,
+            second_stock_price=None
     ):
         """
         Creates and updates course seat products.
@@ -228,7 +231,18 @@ class Course(models.Model):
         seat.attr.save()
 
         try:
-            stock_record = StockRecord.objects.get(product=seat, partner=self.partner)
+            # If only one instance of stock record is present, add another. -mohit741
+            try:
+                stock_record = StockRecord.objects.get(product=seat, partner=self.partner)
+                partner_sku_2 = generate_sku(seat, self.partner, 'IN')
+                stock_record_2 = StockRecord(product=seat, partner=self.partner, partner_sku=partner_sku_2)
+                stock_record_2.price_excl_tax = second_stock_price if second_stock_price is not None else price*70 # TODO Do better than this. -mohit741
+                stock_record_2.price_currency = settings.INDIAN_CURRENCY if settings.INDIAN_CURRENCY is not None else 'INR'
+                stock_record_2.save()
+            except MultipleObjectsReturned as e:
+                logger.warning('%s',e)
+                stock_record = StockRecord.objects.all().filter(product=seat, partner=self.partner)[0]
+                stock_record_2 = StockRecord.objects.all().filter(product=seat, partner=self.partner)[1]
             logger.info(
                 'Retrieved course seat product stock record with certificate type [%s] for [%s] from database.',
                 certificate_type,
@@ -236,7 +250,9 @@ class Course(models.Model):
             )
         except StockRecord.DoesNotExist:
             partner_sku = generate_sku(seat, self.partner)
+            partner_sku_2 = generate_sku(seat, self.partner, 'IN')
             stock_record = StockRecord(product=seat, partner=self.partner, partner_sku=partner_sku)
+            stock_record_2 = StockRecord(product=seat, partner=self.partner, partner_sku=partner_sku_2)
             logger.info(
                 'Course seat product stock record with certificate type [%s] for [%s] does not exist. '
                 'Instantiated a new instance.',
@@ -246,8 +262,10 @@ class Course(models.Model):
 
         stock_record.price_excl_tax = price
         stock_record.price_currency = settings.OSCAR_DEFAULT_CURRENCY
+        stock_record_2.price_excl_tax = second_stock_price if second_stock_price is not None else price*70 # TODO Do better than this. -mohit741
+        stock_record_2.price_currency = settings.INDIAN_CURRENCY if settings.INDIAN_CURRENCY is not None else 'INR'
         stock_record.save()
-
+        stock_record_2.save()
         if remove_stale_modes and self.certificate_type_for_mode(certificate_type) == 'professional':
             id_verification_required_query = Q(
                 attributes__name='id_verification_required',

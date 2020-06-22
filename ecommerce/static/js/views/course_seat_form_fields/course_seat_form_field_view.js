@@ -23,6 +23,12 @@ define([
 
             bindings: {
                 'input[name=certificate_type]': 'certificate_type',
+                'input[name=inr_price]': {
+                    observe: 'inr_price',
+                    setOptions: {
+                        validate: false
+                    }
+                },
                 'input[name=price]': {
                     observe: 'price',
                     setOptions: {

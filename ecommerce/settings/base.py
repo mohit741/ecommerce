@@ -302,6 +302,7 @@ DJANGO_APPS = [
     'csrf.apps.CsrfAppConfig',  # Enables frontend apps to retrieve CSRF tokens.
     'rules.apps.AutodiscoverRulesConfig',
     'xss_utils',
+    'razorpay',
 ]
 
 # Apps specific to this project go here.
@@ -394,6 +395,11 @@ LOGGING = {
             'handlers': ['console', 'local'],
             'level': 'DEBUG',
             'propagate': True,
+        },
+        'razorpay': {
+            'handlers': ['console', 'local'],
+            'level': 'DEBUG',
+            'propagate': False
         },
         '': {
             'handlers': ['console', 'local'],

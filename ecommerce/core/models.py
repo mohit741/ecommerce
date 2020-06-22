@@ -504,6 +504,7 @@ class User(AbstractUser):
     # See https://docs.djangoproject.com/en/3.0/releases/2.0/#abstractuser-last-name-max-length-increased-to-150
     last_name = models.CharField(_('last name'), max_length=30, blank=True)
     full_name = models.CharField(_('Full Name'), max_length=255, blank=True, null=True)
+    country = models.CharField(_('Country'), max_length=10, blank=True, null=True)
     tracking_context = JSONField(blank=True, null=True)
     email = models.EmailField(max_length=254, verbose_name='email address', blank=True, db_index=True)
     lms_user_id = models.IntegerField(

@@ -14,13 +14,14 @@ from six.moves.urllib.parse import urljoin
 
 from ecommerce.settings.base import *
 
+# DEBUG = True
 # Protocol used for construcing absolute callback URLs
 PROTOCOL = 'https'
 
 # Enable offline compression of CSS/JS
 COMPRESS_ENABLED = True
 COMPRESS_OFFLINE = True
-
+COMPRESS_OUTPUT_DIR = 'cache'
 # Email configuration
 EMAIL_BACKEND = 'django_ses.SESBackend'
 
@@ -118,3 +119,8 @@ ENTERPRISE_CUSTOMERS_EXCLUDED_FROM_CATALOG = config_from_yaml.get('ENTERPRISE_CU
 CORS_ALLOW_HEADERS = corsheaders_default_headers + (
     'use-jwt-cookie',
 )
+
+# RazorPay Credentials
+RAZORPAY_API_KEY = 'rzp_test_1hxE0rkPwIdgRa'
+RAZORPAY_API_SECRET = 'KivP0PFv72oxfxkQRIUurs8r'
+

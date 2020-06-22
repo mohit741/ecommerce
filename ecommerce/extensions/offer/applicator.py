@@ -128,3 +128,6 @@ class Applicator(OscarApplicator):
             return offers.select_related('condition', 'benefit')
 
         return []
+
+class CustomApplicator(Applicator):
+    pass
